@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+    </style>
+    <script>
+        function doSearch() {
+            var searchText = document.getElementById("searchText").value;
+            if(event.keyCode==13&&searchText){
+                window.top.WSChannel.searchFriends(searchText,(data)=>{
+                    // var result = [{id:"id1",name:"name1"},{id:"id2",name:"name2"}];
+                    //this.setState({searchResult:data.result});
+                    var html="";
+                    for(var i=0;i<data.result.length;i++) {
+                        var result = data.result[i];
+                        html += "<div style=\"width:100%;display:flex;flex-direction: row;justify-content: flex-start;align-items: center;margin-top: 10px\">";
+                        html+="<div style=\"width:150px;overflow: hidden\">";
+                        html+=result.name;
+                        html+="</div><div style=\"width:300px\">";
+                        html+=result.id;
+                        html+="</div><div><img src=\"../images/addFriend.png\" width=\"12\" height=\"12\" style=\"cursor: pointer\" onclick=\"addFriend('";
+                        html+=result.id;
+                        html+="')\"></div>";
+                        html+="</div>";
+                    }
+
+                    document.getElementById("searchResult").innerHTML=html;
+                });
+            }
+        }
+        function addFriend (id) {
+            window.top.WSChannel.applyMakeFriends(id, ()=> {
+                alert("好友申请已发送，等待对方审核");
+            });
+        }
+    </script>
+</head>
+<body style="padding-left: 10px;padding-top: 5px">
+<div style="display:flex;flex-direction: row;justify-content: flex-start;align-items: center;">
+    请输入对方昵称或标识：
+    <input id="searchText" style="border:none;border-bottom: 1px solid #d0d0d0;width:300px" onkeydown="doSearch()">
+</div>
+<div id="searchResult">
+
+</div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-size: 11pt;
+        }
+    </style>
+    <script>
+        function _clear() {
+            window.top.Store.clear();
+            window.top.document.location.reload();
+
+        }
+
+        function _reset() {
+            window.top.Store.reset();
+            window.top.document.location.reload();
+        }
+    </script>
+</head>
+<body style="padding:10px">
+<div style="width:100%;height:100%;display: flex;flex-direction: column;justify-content: center;align-items: center">
+
+    <div style="width:96px;height:96px;border: 1px solid #d0d0d0;border-radius: 48px;overflow: hidden;text-align: center;line-height: 96px" id="name"></div>
+    <div style="flex-direction: row;justify-content: center;align-items: center;height:40px;line-height: 40px;margin-top: 20px">
+        <span>标识：</span><span id="id">444</span>
+    </div>
+    <div style="width:300px;height:40px;border-radius: 5px;text-align: center;border: 1px solid #d0d0d0;line-height: 40px;margin-top: 20px;cursor: pointer;background-color: #f0f0f0" onclick="_clear()">
+        清除聊天缓存
+    </div>
+    <div style="width:300px;height:40px;border-radius: 5px;text-align: center;border: 1px solid #d0d0d0;line-height: 40px;margin-top: 20px;cursor: pointer;background-color: #f0f0f0" onclick="_reset()">
+        重&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;置
+    </div>
+    <div style="height:50%"></div>
+</div>
+</body>
+<script>
+    document.getElementById("id").innerText = window.top.Store.getCurrentClientId();
+    document.getElementById("name").innerText = window.top.Store.getName();
+</script>
+</html>

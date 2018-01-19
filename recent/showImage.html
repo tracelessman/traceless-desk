@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+    </style>
+</head>
+<body style="display: flex;flex-direction: row;align-items: center;justify-content: center;background-color: #000000;">
+</body>
+<script>
+    var remote = require('electron').remote;
+    document.body.innerHTML = remote.getGlobal("imageHtml");
+</script>
+</html>

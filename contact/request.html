@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+    </style>
+    <script>
+        function accept(id) {
+            window.top.WSChannel.acceptMakeFriends(id, ()=> {
+                window.top.Store.acceptMKFriends(id,()=>{
+                    refresh();
+                });
+            });
+        }
+        function refresh() {
+            var requirelist = window.top.Store.fetchAllReceivedMKFriends();
+            if(requirelist){
+                var html = "";
+                for(var i=0;i<requirelist.length;i++){
+                    var req = requirelist[i];
+                    html += "<div style=\"width:100%;display:flex;flex-direction: row;justify-content: flex-start;align-items: center;margin-top: 10px\">";
+                    html+="<div style=\"width:150px;overflow: hidden\">";
+                    html+=req.name;
+                    html+="</div><div style=\"width:300px\">";
+                    html+=req.id;
+                    html+="</div><div>";
+                    if(req.state==0){
+                        html+="<Button style='width:60px;height:24px' onclick=\"accept('";
+                        html+=req.id;
+                        html+="')\">同意</Button>";
+                    }else{
+                        html+="已添加";
+                    }
+                    html+="</div>";
+                    html+="</div>";
+                }
+                document.body.innerHTML= html;
+            }
+        }
+
+    </script>
+</head>
+<body style="padding-left: 10px">
+
+</body>
+<script>
+    refresh();
+
+</script>
+</html>

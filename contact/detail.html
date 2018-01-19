@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div style="width:100%;height:100%;display:flex;flex-direction: column;justify-content: center;align-items: center;margin-top: 10px">
+    <div style="width:96px;height:96px;border: 1px solid #d0d0d0;border-radius: 48px;overflow: hidden;text-align: center;line-height: 96px" id="name"></div>
+    <div id="id" style="margin-top: 40px"></div>
+    <div id="members" style="margin-top: 40px"></div>
+    <div style="width:300px;height:40px;border-radius: 5px;text-align: center;border: 1px solid #d0d0d0;line-height: 40px;margin-top: 40px;cursor: pointer;background-color: #f0f0f0" onclick="sendMessage()">
+        发消息
+    </div>
+    <div style="height:50%"></div>
+</div>
+<script>
+    var ps = document.location.href.substring(document.location.href.indexOf("?")+1);
+    var params = ps.split("&");
+
+    var id = document.getElementById("id").innerHTML = params[0];
+    var name = document.getElementById("name").innerHTML = decodeURI(params[1]);
+    var isGroup = params[2]=="true";
+    if(isGroup){
+        var html="";
+        var all = window.top.Store.getMembersBaseInfo(id);
+        for(var i=0;i<all.length;i++){
+            var m = all[i];
+            html += "<div style=\"width:100%;display:flex;flex-direction: row;justify-content: flex-start;align-items: center;margin-top: 10px\">";
+            html+="<div style=\"width:80px;overflow: hidden\">";
+            html+=m.name;
+            html+="</div><div style=\"width:300px\">";
+            html+=m.id;
+            html+="</div>";
+            html+="</div>";
+        }
+        document.getElementById("members").innerHTML=html;
+    }
+    function sendMessage() {
+        document.location.href = "../recent/chat.html?"+isGroup+"&"+id;//isGroupChat&id
+    }
+</script>
+</body>
+</html>

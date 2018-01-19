@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+    </style>
+</head>
+<body style="overflow: hidden">
+<div style="height:100%;width:100%;display:flex;flex-direction: column;justify-content:center;align-items: center">
+    <div style="display:flex;flex-direction: row;justify-content: center;align-items: center;width:300px;height:40px;">
+        <span>昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称&nbsp;&nbsp;&nbsp;&nbsp;</span><input id="name" style="height:35px;flex:1;border:none">
+    </div>
+    <div style="width: 300px;height:1px;overflow: hidden;background-color: #f0f0f0"></div>
+    <div style="display:flex;flex-direction: row;justify-content: center;align-items: center;width:300px;height:40px;">
+        <span>服务器ip&nbsp;&nbsp;&nbsp;&nbsp;</span><input id="ip" style="height:35px;flex:1;border:none">
+    </div>
+    <div style="width: 300px;height:1px;overflow: hidden;background-color: #f0f0f0"></div>
+    <div style="display:flex;flex-direction: row;justify-content: center;align-items: center;width:300px;height:40px;">
+        <span>身&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;份&nbsp;&nbsp;&nbsp;&nbsp;</span><input id="clientId" style="height:35px;flex:1;border:none"><button id="refresh" style="border:none;background-color: white"  onclick="generateKey()"><img src="../images/refresh.png" width="20" height="20" style="cursor:pointer"></button>
+    </div>
+    <div style="width: 300px;height:1px;overflow: hidden;background-color: #f0f0f0"></div>
+    <div style="width:300px;height:40px;border-radius: 5px;text-align: center;border: 1px solid #d0d0d0;line-height: 40px;margin-top: 20px;cursor: pointer;background-color: #f0f0f0" onclick="login()">
+        登&nbsp;&nbsp;&nbsp;&nbsp;录
+    </div>
+</div>
+</body>
+<script>
+    if(window.top.Store.getCurrentClientId()){
+        document.getElementById("name").value=window.top.Store.keyData.name;
+        document.getElementById("ip").value=window.top.Store.keyData.server;
+        document.getElementById("clientId").value=window.top.Store.keyData.id;
+
+    }
+    function login() {
+        if(!document.getElementById("name").value){
+            alert("请输入昵称");
+            return;
+        }
+        if(!document.getElementById("ip").value){
+            alert("请输入服务器ip");
+            return;
+        }
+        if(!document.getElementById("clientId").value){
+            alert("您还未有身份，请申请身份");
+            return;
+        }
+        window.top.WSChannel.login(document.getElementById("name").value,document.getElementById("clientId").value,document.getElementById("ip").value,(data,error)=>{
+            if(!error){
+                window.top.Store.setCurrentClientId(document.getElementById("clientId").value);
+                document.location.href = "main.html";
+            }else{
+                alert(error);
+            }
+        });
+
+    }
+
+    function generateKey() {
+        if(!document.getElementById("name").value){
+            alert("请输入昵称");
+            return;
+        }
+        if(!document.getElementById("ip").value){
+            alert("请输入服务器ip");
+            return;
+        }
+        document.getElementById("refresh").disabled=true;
+        document.getElementById("refresh").style.backgroundColor="#e0e0e0";
+        window.top.WSChannel.generateKey(document.getElementById("name").value,document.getElementById("ip").value,(data,error)=>{
+            if(error){
+                alert(error);
+                document.getElementById("refresh").disabled=false;
+                document.getElementById("refresh").style.backgroundColor="#ffffff";
+            }else{
+                window.top.Store.saveKey(document.getElementById("name").value,document.getElementById("ip").value,data.id,data.publicKey,data.privateKey);
+                document.getElementById("clientId").value=data.id;
+            }
+        })
+    }
+</script>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+    </style>
+    <script src="../store/Store.js"></script>
+    <script src="../channel/WSChannel.js"></script>
+
+</head>
+<body style="overflow: hidden">
+<iframe id="frame" style="width:100%;height:100%;" frameborder="0"></iframe>
+</body>
+<script>
+    window.clipboard = require('electron').clipboard;
+    window.ipc = require('electron').ipcRenderer;
+    Store.fetchAllKeys((data)=>{
+        if(data&&data.length>0){
+            var cur = data[0];
+            WSChannel.login(cur.name,cur.id,cur.server,(d,error)=>{
+                if(!error){
+                    Store.setCurrentClientId(cur.id) ;
+                    document.getElementById("frame").src="main.html";
+                }else{
+                    alert(error);
+                    document.getElementById("frame").src="login.html";
+                }
+            });
+
+        }else{
+            document.getElementById("frame").src="login.html";
+
+        }
+    });
+    var notifyNewMsg = function () {
+       ipc.send("messageReceive");
+    }
+    var notifyReadMsg = function () {
+        ipc.send("messageRead");
+    }
+    window.top.Store.on("receiveMessage",notifyNewMsg);
+    window.top.Store.on("readChatRecords",notifyReadMsg);
+    window.top.Store.on("readGroupChatRecords",notifyReadMsg);
+    window.top.Store.on("receiveGroupMessage",notifyNewMsg);
+
+    window.top.Store.on("receiveMKFriends",function(name){
+        const notification = {
+            title: '好友申请',
+            body: name+"  申请加您为好友"
+        }
+        const myNotification = new window.Notification(notification.title, notification);
+    });
+</script>
+</html>

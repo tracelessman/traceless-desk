@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+
+    </style>
+    <script>
+
+        function paste() {
+            if((event.metaKey||event.ctrlKey)&&event.keyCode==86){
+                var text = window.top.clipboard.readText();
+                if(text){
+                    var selection = window.getSelection();
+                    selection.deleteFromDocument();
+                    var range =  selection.getRangeAt(0);
+                    range.insertNode(document.createTextNode(text));
+                    selection.collapseToEnd();
+                }else{
+                    var img = window.top.clipboard.readImage();
+                    if(!img.isEmpty()){
+                        //const message = `<img width=\"${img.getSize().width/2}\" height=\"${img.getSize().height/2}\" src=\" ${img.toDataURL()}\">`
+                        var selection = window.getSelection();
+                        selection.deleteFromDocument();
+                        var range =  selection.getRangeAt(0);
+                        //var markTag = document.createElement("m");
+                        //range.insertNode(markTag);
+                        var imgTag = document.createElement("img");
+                        imgTag.width = img.getSize().width/2;
+                        imgTag.height = img.getSize().height/2;
+                        imgTag.src = img.toDataURL();
+                        range.insertNode(imgTag);
+                        selection.collapseToEnd();
+                    }
+                }
+                event.preventDefault();
+            }else if((event.metaKey||event.ctrlKey)&&event.keyCode==13){
+                window.parent.send();
+            }
+        }
+    </script>
+</head>
+<body contenteditable="true" onkeydown="paste()"></body></html>
