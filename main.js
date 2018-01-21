@@ -137,12 +137,12 @@ function checkUpdate(){
                         }
                     }
                     let counter=0;
-                    files.forEach(function (path) {
-                        let req = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/master/"+path);
-                        let index = path.lastIndexOf("/");
+                    files.forEach(function (p) {
+                        let req = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/master/"+p);
+                        let index = p.lastIndexOf("/");
                         let dir;
                         if(index!=-1){
-                            dir = path.substring(0,path.lastIndexOf("/"));
+                            dir = p.substring(0,p.lastIndexOf("/"));
                         }
 
 
@@ -159,7 +159,7 @@ function checkUpdate(){
                                             fs.mkdirSync(nd);
                                         }
                                     }
-                                    fs.writeFile(path.join(__dirname,path),txt,function (err) {
+                                    fs.writeFile(path.join(__dirname,p),txt,function (err) {
                                         if(err){
                                             console.info(err);
                                         }else{
@@ -175,7 +175,7 @@ function checkUpdate(){
                                     console.info(err);
                                 });
                             }else{
-                                console.info(path+" download err:"+rep.statusCode);
+                                console.info(p+" download err:"+rep.statusCode);
                             }
                         });
                         req.end();
