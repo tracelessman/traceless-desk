@@ -3,7 +3,7 @@
   "changeList":[
     {
       "version":"0.1.1",
-      "files":["main.js"],
+      "files":["main.js","index/update.html"],
       "detail":["添加自动更新的能力"]
     }
   ]
