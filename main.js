@@ -12,22 +12,40 @@ const nativeImage = require('electron').nativeImage;
 const net = electron.net
 const dialog = electron.dialog
 
-
+function isDev(){
+    const getFromEnv = parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
+    const isEnvSet = 'ELECTRON_IS_DEV' in process.env;
+    return isEnvSet ? getFromEnv : (process.defaultApp || /node_modules[\\/]electron[\\/]/.test(process.execPath));
+}
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
 function createWindow () {
-    checkUpdate();
+
     // Create the browser window.
     mainWindow = new BrowserWindow({width: 800, height: 600})
-    mainWindow.webContents.openDevTools();
+    //mainWindow.webContents.openDevTools();
     // and load the index.html of the app.
-    mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, '/index/index.html'),
-        protocol: 'file:',
-        slashes: true
-    }))
+    checkUpdate(function (hasNew) {
+        if(hasNew){
+            global.upgradeMessage="";
+            mainWindow.loadURL(url.format({
+                pathname: path.join(__dirname, '/index/update.html'),
+                protocol: 'file:',
+                slashes: true
+            }))
+
+        }else{
+            mainWindow.loadURL(url.format({
+                pathname: path.join(__dirname, '/index/index.html'),
+                protocol: 'file:',
+                slashes: true
+            }))
+        }
+
+    })
+
 
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
@@ -88,6 +106,7 @@ ipc.on('openImageBrowser', function (event, arg) {
 })
 
 
+
 if(app.dock){
     var image = nativeImage.createFromPath(path.join(__dirname, "/images/traceless.png"));
     app.dock.setIcon(image);
@@ -108,7 +127,11 @@ ipc.on('messageRead',function (event,arg) {
     }
 })
 let hasNewVersion = false;
-function checkUpdate(){
+function checkUpdate(callback){
+    if(isDev()){
+        callback(false);
+        return;
+    }
     let request = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/master/upgrade.json");
     request.on('response', (response) => {
         let text="";
@@ -122,9 +145,9 @@ function checkUpdate(){
                 let curVersion = parseInt(app.getVersion().replace(/\./ig,""));
                 if(remoteVersion>curVersion){
                     hasNewVersion=true;
-                    dialog.showMessageBox(null,{type:"info",message:"更新中..."})
+                    callback(true);
                     let changeList = des.changeList;
-                    let files = [];
+                    let files = ["package.json"];
                     for(var i=0;i<changeList.length;i++){
                         var change = changeList[i];
                         if(parseInt(change.version.replace(/\./ig,""))<=remoteVersion){
@@ -161,30 +184,52 @@ function checkUpdate(){
                                     }
                                     fs.writeFile(path.join(__dirname,p),txt,function (err) {
                                         if(err){
-                                            console.info(err);
+                                           // mainWindow.webContents.send("upgradeMessage",{msg:err});
+                                            global.upgradeMessage += err.toString()+"<br>";
+                                            //dialog.showMessageBox(null,{type:"info",message:err.toString()})
                                         }else{
+                                            // mainWindow.webContents.send("upgradeMessage",p+" 更新成功");
+                                            global.upgradeMessage += p+" 更新成功...<br>";
                                             counter++;
+                                            //dialog.showMessageBox("",{message:""});
                                             if(counter==files.length){//所有下载成功
-                                                app.relaunch();
-                                                app.exit(0);
+                                                global.upgradeMessage += " 更新完成，准备重启...";
+                                                 app.relaunch();
+                                                 app.exit(0);
                                             }
                                         }
                                     });
                                 });
                                 rep.on('error', (err) => {
-                                    console.info(err);
+                                    // mainWindow.webContents.send("upgradeMessage",err);
+                                    global.upgradeMessage += err.toString()+"<br>";
+                                    //dialog.showMessageBox(null,{type:"info",message:err.toString()})
                                 });
                             }else{
-                                console.info(p+" download err:"+rep.statusCode);
+                                // mainWindow.webContents.send("upgradeMessage","download "+p+" "+rep.statusCode);
+                                global.upgradeMessage += "download "+p+" "+rep.statusCode+"<br>";
+                                //dialog.showMessageBox(null,{type:"info",message:p+" download err:"+rep.statusCode})
                             }
+                        });
+                        req.on("error",function (err) {
+                            // mainWindow.webContents.send("upgradeMessage","download "+p+":"+err);
+                            global.upgradeMessage += "download "+p+":"+err.toString()+"<br>";
                         });
                         req.end();
                     })
+
+                }else{
+                    callback(false);
                 }
+
             })
         }
     })
+    request.on("error",function (err) {
+        console.info(err.toString());
+    });
     request.end();
+
 }
 
 // In this file you can include the rest of your app's specific main process
