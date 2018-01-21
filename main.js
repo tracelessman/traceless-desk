@@ -7,7 +7,10 @@ const ipc = require('electron').ipcMain
 
 const path = require('path')
 const url = require('url')
+const fs = require('fs');
 const nativeImage = require('electron').nativeImage;
+const net = electron.net
+const dialog = electron.dialog
 
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -15,9 +18,10 @@ const nativeImage = require('electron').nativeImage;
 let mainWindow
 
 function createWindow () {
+    checkUpdate();
     // Create the browser window.
     mainWindow = new BrowserWindow({width: 800, height: 600})
-    //mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     // and load the index.html of the app.
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, '/index/index.html'),
@@ -103,6 +107,85 @@ ipc.on('messageRead',function (event,arg) {
         app.dock.setBadge("");
     }
 })
+let hasNewVersion = false;
+function checkUpdate(){
+    let request = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/master/upgrade.json");
+    request.on('response', (response) => {
+        let text="";
+        if(response.statusCode==200){
+            response.on('data', (chunk) => {
+                text+=chunk;
+            })
+            response.on('end', () => {
+                let des = JSON.parse(text);
+                let remoteVersion = parseInt(des.version.replace(/\./ig,""));
+                let curVersion = parseInt(app.getVersion().replace(/\./ig,""));
+                if(remoteVersion>curVersion){
+                    hasNewVersion=true;
+                    dialog.showMessageBox(null,{type:"info",message:"更新中..."})
+                    let changeList = des.changeList;
+                    let files = [];
+                    for(var i=0;i<changeList.length;i++){
+                        var change = changeList[i];
+                        if(parseInt(change.version.replace(/\./ig,""))<=remoteVersion){
+                            var _cfs = change.files;
+                            _cfs.forEach(function (f) {
+                                if(files.indexOf(f)==-1){
+                                    files.push(f);
+                                }
+                            })
+                        }
+                    }
+                    let counter=0;
+                    files.forEach(function (path) {
+                        let req = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/master/"+path);
+                        let index = path.lastIndexOf("/");
+                        let dir;
+                        if(index!=-1){
+                            dir = path.substring(0,path.lastIndexOf("/"));
+                        }
+
+
+                        req.on("response",(rep)=>{
+                            var txt="";
+                            if(rep.statusCode==200){
+                                rep.on("data",(chunk)=>{
+                                    txt+=chunk;
+                                });
+                                rep.on("end",()=>{
+                                    if(dir){
+                                        var nd = path.join(__dirname, dir)
+                                        if(!fs.existsSync(nd)){
+                                            fs.mkdirSync(nd);
+                                        }
+                                    }
+                                    fs.writeFile(path.join(__dirname,path),txt,function (err) {
+                                        if(err){
+                                            console.info(err);
+                                        }else{
+                                            counter++;
+                                            if(counter==files.length){//所有下载成功
+                                                app.relaunch();
+                                                app.exit(0);
+                                            }
+                                        }
+                                    });
+                                });
+                                rep.on('error', (err) => {
+                                    console.info(err);
+                                });
+                            }else{
+                                console.info(path+" download err:"+rep.statusCode);
+                            }
+                        });
+                        req.end();
+                    })
+                }
+            })
+        }
+    })
+    request.end();
+}
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

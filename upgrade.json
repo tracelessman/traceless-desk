@@ -1,6 +1,11 @@
 {
-  "0.1.1":{
-    "files":["main.js"],
-    "detail":["添加自动更新的能力"]
-  }
+  "version":"0.1.1",
+  "changeList":[
+    {
+      "version":"0.1.1",
+      "files":["main.js"],
+      "detail":["添加自动更新的能力"]
+    }
+  ]
+
 }
