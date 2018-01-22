@@ -3,7 +3,7 @@
   "changeList":[
     {
       "version":"0.1.1",
-      "files":["main.js","index/update.html","index/index.html","store/Store.js","store/"],
+      "files":["main.js","index/update.html","index/index.html"],
       "detail":["添加自动更新的能力"]
     },{
       "version":"0.1.2",
