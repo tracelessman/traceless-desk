@@ -56,7 +56,7 @@
         ipc.send("messageReceive");
         const notification = {
             title: "群消息",
-            body: Store.getGroup(id).name+"有新消息，请注意查收"
+            body: Store.getGroup(gid).name+"有新消息，请注意查收"
         }
         const myNotification = new window.Notification(notification.title, notification);
     }
