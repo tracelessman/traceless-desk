@@ -14,7 +14,7 @@
             height: 100%;
         }
     </style>
-    <script src="../store/Store.js"></script>
+    <script src="../store/LocalStore.js"></script>
     <script src="../channel/WSChannel.js"></script>
 
 </head>
@@ -24,6 +24,7 @@
 <script>
     window.clipboard = require('electron').clipboard;
     window.ipc = require('electron').ipcRenderer;
+    window.remote = require('electron').remote;
     Store.fetchAllKeys((data)=>{
         if(data&&data.length>0){
             var cur = data[0];
@@ -43,8 +44,7 @@
         }
     });
     var notifyNewMsg = function (id) {
-
-       ipc.send("messageReceive");
+       ipc.send("messageReceive",{total:Store.getTotalNewMSgNum()});
 
         const notification = {
             title: "新消息",
@@ -53,7 +53,7 @@
         const myNotification = new window.Notification(notification.title, notification);
     }
     var notifyNewGroupMsg = function (gid) {
-        ipc.send("messageReceive");
+        ipc.send("messageReceive",{total:Store.getTotalNewMSgNum()});
         const notification = {
             title: "群消息",
             body: Store.getGroup(gid).name+"有新消息，请注意查收"
@@ -61,7 +61,7 @@
         const myNotification = new window.Notification(notification.title, notification);
     }
     var notifyReadMsg = function () {
-        ipc.send("messageRead");
+        ipc.send("messageRead",{total:Store.getTotalNewMSgNum()});
     }
     window.top.Store.on("receiveMessage",notifyNewMsg);
     window.top.Store.on("readChatRecords",notifyReadMsg);
@@ -75,5 +75,7 @@
         }
         const myNotification = new window.Notification(notification.title, notification);
     });
+
+
 </script>
 </html>

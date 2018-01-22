@@ -64,9 +64,9 @@
     function refreshRecordList() {
         var records = [];
         if(isGroupChat){
-            records = window.top.Store.readGroupChatRecords(otherId);
+            records = window.top.Store.readGroupChatRecords(otherId,!window.top.remote.getGlobal("mainWindow").isFocused());
         }else{
-            records = window.top.Store.readAllChatRecords(otherId);
+            records = window.top.Store.readAllChatRecords(otherId,!window.top.remote.getGlobal("mainWindow").isFocused());
         }
         var html = "";
         var name = window.top.Store.getName();
@@ -149,16 +149,28 @@
         }
     }
 
+    function onWindowFocus() {
+        if((isGroupChat&&window.top.Store.getGroup(otherId).newReceive)||(!isGroupChat&&window.top.Store.getRecent(otherId).newReceive)){
+            if(isGroupChat){
+                records = window.top.Store.readGroupChatRecords(otherId);
+            }else{
+                records = window.top.Store.readAllChatRecords(otherId);
+            }
+        }
+    }
+
     window.top.Store.on("receiveMessage",onReceiveMessage);
     window.top.Store.on("sendMessage",onSendMessage);
     window.top.Store.on("receiveGroupMessage",onReceiveMessage);
     window.top.Store.on("sendGroupMessage",onSendMessage);
+    window.top.ipc.on("mainWindow-focus",onWindowFocus);
 
     window.addEventListener("beforeunload", function (event) {
         window.top.Store.un("receiveMessage",onReceiveMessage);
         window.top.Store.un("sendMessage",onSendMessage);
         window.top.Store.un("receiveGroupMessage",onReceiveMessage);
         window.top.Store.un("sendGroupMessage",onSendMessage);
+        window.top.ipc.removeListener("mainWindow-focus",onWindowFocus);
     });
 </script>
 </html>

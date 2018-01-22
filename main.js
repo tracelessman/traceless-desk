@@ -24,8 +24,10 @@ let mainWindow
 function createWindow () {
 
     // Create the browser window.
-    mainWindow = new BrowserWindow({width: 800, height: 600})
-    //mainWindow.webContents.openDevTools();
+    mainWindow = new BrowserWindow({width: 800, height: 600});
+    global.mainWindow = mainWindow;
+
+    mainWindow.webContents.openDevTools();
     // and load the index.html of the app.
     checkUpdate(function (hasNew) {
         if(hasNew){
@@ -56,6 +58,10 @@ function createWindow () {
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
         mainWindow = null
+    })
+
+    mainWindow.on("focus",function () {
+        mainWindow.webContents.send("mainWindow-focus");
     })
 }
 
@@ -113,17 +119,18 @@ if(app.dock){
 }
 
 
-let newMsgNotifyTimes=0;
 ipc.on('messageReceive',function (event,arg) {
-    newMsgNotifyTimes++;
     if(app.dock){
-        app.dock.setBadge("new");
+        app.dock.setBadge(arg.total+"");
     }
 })
 ipc.on('messageRead',function (event,arg) {
-    newMsgNotifyTimes--;
-    if(app.dock&&newMsgNotifyTimes<=0){
-        app.dock.setBadge("");
+    if(app.dock){
+        if(arg.total){
+            app.dock.setBadge(arg.total+"");
+        }else{
+            app.dock.setBadge("");
+        }
     }
 })
 let hasNewVersion = false;

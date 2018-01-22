@@ -28,9 +28,11 @@ var Store = {
 
     clientId:null,
 
-    // v:desk
     _save :function () {
-        localStorage.setItem("data",JSON.stringify(this.data));
+        this.save2Local("data",JSON.stringify(this.data));
+    },
+    save2Local : function (key,value) {
+
     },
 
     saveKey:function (name,server,id,publicKey,privateKey,) {
@@ -53,19 +55,23 @@ var Store = {
             this.data.splice(0,1,{name:name,server:server,id:id,publicKey:publicKey,privateKey:privateKey});
         this._save();
     },
-// v:desk
     fetchAllKeys : function (callback) {
         if(this.data){
             callback(this.data);
         }else{
-            var result = localStorage.getItem("data");
-            if(result){
-                this.data = JSON.parse(result);
-                callback(this.data);
-            }else{
-                callback(null);
-            }
+            this.queryFromLocal("data",function (result) {
+                if(result){
+                    Store.data = JSON.parse(result);
+                    callback(Store.data);
+                }else{
+                    callback(null);
+                }
+            })
         }
+    },
+
+    queryFromLocal:function (key,callback) {
+
     },
     setCurrentClientId:function (id) {
         for(var i=0;i<this.data.length;i++) {
@@ -210,16 +216,19 @@ var Store = {
             }
         }
         if(force){
-            var recent = {id:id,records:[],newReceive:false};
+            var recent = {id:id,records:[],newReceive:false,newMsgNum:0};
             recents.push(recent)
             return recent;
         }
     },
-    readAllChatRecords : function (id) {
+    readAllChatRecords : function (id,ignoreState) {
         var recent = this.getRecent(id,true);
-        recent.newReceive=false;
-        this._save();
-        this._fire("readChatRecords",id)
+        if(recent.newReceive==true&&ignoreState!=true){
+            recent.newReceive=false;
+            recent.newMsgNum=0;
+            this._save();
+            this._fire("readChatRecords",id)
+        }
         return recent.records;
     },
     _getChatRecords:function (id, force, newMsg) {
@@ -227,6 +236,10 @@ var Store = {
         if(recent){
             if(newMsg){
                 recent.newReceive=true;
+                if(isNaN(recent.newMsgNum)){
+                    recent.newMsgNum = 0;
+                }
+                recent.newMsgNum++;
             }
             return recent.records;
         }
@@ -264,7 +277,7 @@ var Store = {
         return groups;
     },
     addGroup:function (id,name,members) {
-        this.getGroups().push({id:id,name:name,members:members,records:[],newReceive:false});
+        this.getGroups().push({id:id,name:name,members:members,records:[],newReceive:false,newMsgNum:0});
         this._save();
         this._fire("addGroup");
     },
@@ -279,7 +292,7 @@ var Store = {
             }
         }
         if(force){
-            var g = {id:id,members:[],records:[],newReceive:false};
+            var g = {id:id,members:[],records:[],newReceive:false,newMsgNum:0};
             groups.push(g)
             return g;
         }
@@ -287,11 +300,14 @@ var Store = {
     getGroup:function (id) {
         return this._getGroup(id,false);
     },
-    readGroupChatRecords:function (id) {
+    readGroupChatRecords:function (id,ignoreState) {
         var g = this._getGroup(id,true);
-        g.newReceive=false;
-        this._save();
-        this._fire("readGroupChatRecords",id)
+        if(g.newReceive==true&&ignoreState!=true){
+            g.newReceive=false;
+            g.newMsgNum=0;
+            this._save();
+            this._fire("readGroupChatRecords",id);
+        }
         return g.records;
     },
     getMembersBaseInfo:function (gid) {
@@ -322,6 +338,10 @@ var Store = {
         if(g){
             if(newMsg){
                 g.newReceive=true;
+                if(isNaN(g.newMsgNum)){
+                    g.newMsgNum = 0;
+                }
+                g.newMsgNum++;
             }
             return g.records;
         }
@@ -364,6 +384,22 @@ var Store = {
         this.clientId = null;
         this.keyData = null;
         this._save();
+    },
+    getTotalNewMSgNum:function () {
+        var recent = this.getAllRecent();
+        var total=0;
+        recent.forEach(function (r) {
+            if(!isNaN(r.newMsgNum)){
+                total += r.newMsgNum;
+            }
+        });
+        var groups = this.getGroups();
+        groups.forEach(function (r) {
+            if(!isNaN(r.newMsgNum)){
+                total += r.newMsgNum;
+            }
+        });
+        return total;
     }
     // rejectMKFriends : function (index) {
     //     for(var i=0;i<this.data.length;i++) {
@@ -378,3 +414,4 @@ var Store = {
 };
 
 //获取本地key，无key就引导下载，有则到主界面
+module.exports=Store
