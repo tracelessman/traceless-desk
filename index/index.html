@@ -66,7 +66,7 @@
     window.top.Store.on("receiveMessage",notifyNewMsg);
     window.top.Store.on("readChatRecords",notifyReadMsg);
     window.top.Store.on("readGroupChatRecords",notifyReadMsg);
-    window.top.Store.on("receiveGroupMessage",notifyNewMsg);
+    window.top.Store.on("receiveGroupMessage",notifyNewGroupMsg);
 
     window.top.Store.on("receiveMKFriends",function(name){
         const notification = {
