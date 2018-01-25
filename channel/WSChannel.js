@@ -1,6 +1,7 @@
 /**
  * Created by renbaogang on 2017/10/28.
  */
+var Store = require("../store/Store")
 var WSChannel={
     seed:0,
     callbacks:{},
@@ -46,9 +47,12 @@ var WSChannel={
             };
 
             this.ws.onerror = function incoming(event) {
-                // console.log("error: "+event.message);
+                console.info("error: "+event.message+"::"+this.ws.readyState+":"+this.ws.OPEN+":"+this.ws.CONNECTING);
+
             };
             this.ws.onclose = (event)=>{
+                var t = new Date();
+                console.info("close "+t.getHours()+":"+t.getMinutes()+":"+t.getSeconds());
                 if(event.target.ip==WSChannel.ip){
                     delete WSChannel.ws;
                     setTimeout(()=>{this.getChannel(event.target.ip)},5000);
@@ -96,7 +100,6 @@ var WSChannel={
         var times=0;
         var ws = this.getChannel(ip);
         var tmp = function () {
-            console.info(ws.readyState+":"+ws.OPEN+":"+ws.CONNECTING);
             if(ws.readyState==ws.OPEN){
                 ws.send(JSON.stringify(WSChannel.newRequestMsg("login",{name:name},callback,clientId)));
             }
@@ -159,3 +162,4 @@ var WSChannel={
 
 
 };
+module.exports=WSChannel

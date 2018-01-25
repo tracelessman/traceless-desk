@@ -1,5 +1,5 @@
 {
-  "version":"0.1.2",
+  "version":"0.1.3",
   "changeList":[
     {
       "version":"0.1.1",
@@ -9,6 +9,10 @@
       "version":"0.1.2",
       "files":["main.js","store/Store.js","store/LocalStore.js","index/index.html","recent/chat.html","recent/recent.html"],
       "detail":["独立出存储通用接口","精确提示新消息个数"]
+    },{
+      "version":"0.1.3",
+      "files":["channel/LocalWSChannel.js","channel/WSChannel.js","index/index.html"],
+      "detail":["独立出通信通用接口"]
     }
   ]
 
