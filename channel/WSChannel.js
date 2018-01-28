@@ -125,7 +125,7 @@ var WSChannel={
                     callback()
                 }else{
                     //TODO 提示不够精确
-                    alert("无法连接服务器");
+                    //alert("无法连接服务器");
                 }
             }
 
