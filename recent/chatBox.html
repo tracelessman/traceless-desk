@@ -46,7 +46,29 @@
                 }
                 event.preventDefault();
             }else if((event.metaKey||event.ctrlKey)&&event.keyCode==13){
-                window.parent.send();
+                var imgReg = /(<img.*?>)/ig;//img为分割
+                var srcReg = /src=[\"\'](.*)[\"\']/ig;
+                var wrapTagStartReg = /<[div|br].*?>/ig;//折行标签开始部分替换成换行符
+                //匹配非折行标签
+                var notWrapTagReg = /<(?![div|br]).*?>/ig;
+//              var r = document.body.innerHTML.match(reg);
+
+                var ss = document.body.innerHTML.split(imgReg);
+                ss.forEach(function (p) {
+                    //alert(p);
+                    if(p.startsWith("<img")){
+                        var sr = p.match(srcReg);
+                        if(sr){
+                            window.parent.sendImg(RegExp.$1);
+                        }
+                    }else{
+                        var s = p.replace(notWrapTagReg,"").replace(wrapTagStartReg,"\r\n").trim();
+                        if(s)
+                        window.parent.sendText(s);
+                    }
+                })
+                document.body.innerHTML = "";
+               // window.parent.send();
             }
         }
     </script>
