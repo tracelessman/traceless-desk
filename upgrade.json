@@ -1,5 +1,5 @@
 {
-  "version":"0.1.4",
+  "version":"0.1.5",
   "changeList":[
     {
       "version":"0.1.1",
@@ -17,6 +17,10 @@
       "version":"0.1.4",
       "files":["channel/WSChannel.js","recent/chat.html","recent/chatBox.html"],
       "detail":["完善通信管道，异步获取管道，增加心跳机制","拆分发送桌面版消息，使和移动端消息格式兼容"]
+    },{
+      "version":"0.1.5",
+      "files":["main.js"],
+      "detail":["完善更新程序"]
     }
   ]
 

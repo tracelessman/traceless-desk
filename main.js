@@ -157,7 +157,8 @@ function checkUpdate(callback){
                     let files = ["package.json"];
                     for(var i=0;i<changeList.length;i++){
                         var change = changeList[i];
-                        if(parseInt(change.version.replace(/\./ig,""))<=remoteVersion){
+                        var vChange = parseInt(change.version.replace(/\./ig,""));
+                        if(vChange>curVersion&&vChange<=remoteVersion){
                             var _cfs = change.files;
                             _cfs.forEach(function (f) {
                                 if(files.indexOf(f)==-1){
@@ -167,6 +168,7 @@ function checkUpdate(callback){
                         }
                     }
                     let counter=0;
+                    let counter2=0;
                     files.forEach(function (p) {
                         let req = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/master/"+p);
                         let index = p.lastIndexOf("/");
@@ -190,6 +192,7 @@ function checkUpdate(callback){
                                         }
                                     }
                                     fs.writeFile(path.join(__dirname,p),txt,function (err) {
+
                                         if(err){
                                            // mainWindow.webContents.send("upgradeMessage",{msg:err});
                                             global.upgradeMessage += err.toString()+"<br>";
@@ -199,7 +202,7 @@ function checkUpdate(callback){
                                             global.upgradeMessage += p+" 更新成功...<br>";
                                             counter++;
                                             //dialog.showMessageBox("",{message:""});
-                                            if(counter==files.length){//所有下载成功
+                                            if(counter+counter2==files.length){//所有下载成功
                                                 global.upgradeMessage += " 更新完成，准备重启...";
                                                  app.relaunch();
                                                  app.exit(0);
@@ -213,6 +216,8 @@ function checkUpdate(callback){
                                     //dialog.showMessageBox(null,{type:"info",message:err.toString()})
                                 });
                             }else{
+                                if(rep.statusCode==304)
+                                    counter2++;
                                 // mainWindow.webContents.send("upgradeMessage","download "+p+" "+rep.statusCode);
                                 global.upgradeMessage += "download "+p+" "+rep.statusCode+"<br>";
                                 //dialog.showMessageBox(null,{type:"info",message:p+" download err:"+rep.statusCode})
