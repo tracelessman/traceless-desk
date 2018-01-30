@@ -27,7 +27,7 @@ function createWindow () {
     mainWindow = new BrowserWindow({width: 800, height: 600,titleBarStyle: 'hidden',frame:true});
     global.mainWindow = mainWindow;
     global.appVersion = app.getVersion();
-    mainWindow.webContents.openDevTools();
+    //mainWindow.webContents.openDevTools();
     // and load the index.html of the app.
     checkUpdate(function (hasNew) {
         if(hasNew){
