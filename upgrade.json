@@ -1,5 +1,5 @@
 {
-  "version":"0.1.5",
+  "version":"0.1.6",
   "changeList":[
     {
       "version":"0.1.1",
@@ -21,6 +21,14 @@
       "version":"0.1.5",
       "files":["main.js"],
       "detail":["完善更新程序"]
+    },{
+      "version":"0.1.6",
+      "files":["contact/addFriend.html","contact/contact.html","contact/detail.html","contact/request.html",
+        "css/index.css","css/MaterialIcons-Regular.woff2",
+        "index/index.html","index/main.html",
+        "main.js","mine/mine.html",
+        "recent/addGroup.html","recent/chat.html","recent/default.html","recent/recent.html"],
+      "detail":["新的整体界面风格"]
     }
   ]
 

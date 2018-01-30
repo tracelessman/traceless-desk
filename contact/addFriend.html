@@ -12,6 +12,9 @@
 
         html, body {
             height: 100%;
+            font-size: 10pt;
+            font-family: sans-serif;
+            background-color:white;
         }
     </style>
     <script>
@@ -46,12 +49,15 @@
         }
     </script>
 </head>
-<body style="padding-left: 10px;padding-top: 5px">
-<div style="display:flex;flex-direction: row;justify-content: flex-start;align-items: center;">
+<body style="">
+<div style="width:100%;height:30px;background-color: #636363;line-height: 30px;color:white;padding-left: 20px" >
+    <span>添加联系人</span>
+</div>
+<div style="display:flex;flex-direction: row;justify-content: flex-start;align-items: center;padding-left: 10px;padding-top: 5px">
     请输入对方昵称或标识：
     <input id="searchText" style="border:none;border-bottom: 1px solid #d0d0d0;width:300px" onkeydown="doSearch()">
 </div>
-<div id="searchResult">
+<div id="searchResult" style="padding-left: 10px;padding-top: 5px">
 
 </div>
 </body>

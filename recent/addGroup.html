@@ -13,18 +13,24 @@
         html, body {
             height: 100%;
             font-size: 10pt;
+            font-family: sans-serif;
+            background-color:white;
         }
     </style>
+
 </head>
-<body style="padding-left: 10px;padding-top: 5px">
-<div style="display:flex;flex-direction: row;justify-content: flex-start;align-items: center;">
+<body style="">
+<div style="width:100%;height:30px;background-color: #636363;line-height: 30px;color:white;padding-left: 20px" >
+    <span>创建群聊</span>
+</div>
+<div style="display:flex;flex-direction: row;justify-content: flex-start;align-items: center;padding-left: 10px;padding-top: 5px">
     <span style="font-weight: bold;font-size: 11pt">群名称：</span>
     <input id="name" style="border:none;border-bottom: 1px solid #d0d0d0;width:300px" >
     <div style="width:50px;height:22px;border-radius: 5px;text-align: center;border: 1px solid #d0d0d0;line-height: 22px;cursor: pointer;background-color: #f0f0f0;font-size: 9pt;margin-left: 10px" onclick="addGroup()">
         确定
     </div>
 </div>
-<div id="contact">
+<div id="contact" style="padding-left: 10px">
 
 </div>
 

@@ -13,22 +13,25 @@
         html, body {
             height: 100%;
             font-size: 10pt;
+            font-family: sans-serif;
+            background-color: #ffffff;
         }
     </style>
+
+    <link href="../css/index.css" rel="stylesheet"></link>
 </head>
 <body>
 <div style="height:100%;width:100%;display:flex;flex-direction: row;align-items: center">
-    <div style="height:100%;width:200px;background-color: #ffffff;border-right: 1px solid #d0d0d0;display: flex;flex-direction: column;align-items: center;overflow: hidden">
-        <div style="width:100%;height:32px;background-color: #f0f0f0;border-bottom: 1px solid #d0d0d0;line-height: 32px;text-align: center;font-size: 11pt;font-weight: bold" >最近
+    <div style="height:100%;width:200px;display: flex;flex-direction: column;align-items: center;overflow: hidden">
+        <div style="width:100%;height:30px;background-color: #636363;border-right: 1px solid #535353;line-height: 30px;text-align: center;color:white;" >消息
+            <i class="material-icons" style="font-size: 20px;float: right;cursor: pointer;margin-top: 6px;margin-right: 10px;color:#f0f0f0" onclick="addGroup()">group_add</i>
         </div>
-        <div style="width:100%;height:32px;line-height: 32px;cursor: pointer;padding-left: 10px;border-bottom: 1px solid #f0f0f0" onclick="addGroup()">
-            <img src="../images/groupChat.png" width="16" height="16" style="float: left;margin-top: 8px;margin-right: 8px;cursor: pointer" >
-            创建群聊</div>
-        <div id="recent" style="width:200px;display: flex;flex-direction: column;align-items: center;">
+
+        <div id="recent" style="width:200px;flex:1;display: flex;flex-direction: column;align-items: center;border-right: 1px solid #d0d0d0;">
         </div>
     </div>
-    <div style="flex:1;height:100%;background-color: white;display: flex">
-        <iframe id="frame" style="width:100%;height:100%" frameborder="0"></iframe>
+    <div style="flex:1;height:100%;display: flex">
+        <iframe id="frame" style="width:100%;height:100%"  src="./default.html" frameborder="0"></iframe>
     </div>
 </div>
 </body>
