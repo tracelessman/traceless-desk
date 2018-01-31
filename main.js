@@ -190,7 +190,7 @@ ipc.on("remoteVersion-request",function (event,arg) {
 
 ipc.on("upgrade-request",function (event,arg) {
     checkUpdate(function (hasNew) {
-        if(hasNew){
+        if(hasNew||isDev()){
             mainWindow.loadURL(url.format({
                 pathname: path.join(__dirname, '/index/update.html'),
                 protocol: 'file:',
@@ -330,6 +330,9 @@ function download(files) {
         changeMsg(f,"downloading");
         mainWindow.webContents.downloadURL(baseURI+f);
     })
+    if(files.length==0){
+        mainWindow.webContents.executeJavaScript("complete()");
+    }
 }
 
 // In this file you can include the rest of your app's specific main process

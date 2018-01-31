@@ -91,7 +91,7 @@
     window.top.ipc.on("remoteVersion-response",doVersionResponse);
     function doVersionRequest() {
         window.top.ipc.send("remoteVersion-request");
-        setTimeout(doVersionRequest,60*1000);
+        setTimeout(doVersionRequest,60*60*1000);
     }
     doVersionRequest();
    // setTimeout(doVersionRequest,60*1000);
