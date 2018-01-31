@@ -1,5 +1,5 @@
 {
-  "version":"0.1.7",
+  "version":"0.1.8",
   "changeList":[
     {
       "version":"0.1.1",
@@ -33,6 +33,10 @@
       "version":"0.1.7",
       "files":["css/index.css","css/MaterialIcons-Regular.ttf","css/MaterialIcons-Regular.woff"],
       "detail":["解决文字图标无法显示的问题"]
+    },{
+      "version":"0.1.8",
+      "files":["index/main.html","index/update.html","main.js","mine/mine.html"],
+      "detail":["完善代码升级"]
     }
   ]
 

@@ -2,19 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>update</title>
 </head>
-<body style="text-align: center">
-更新中...
+<body style="text-align: left;font-size: 11pt;padding-left: 20px;padding-top: 25px;">
+<div>更新中...</div>
+<div id="msg" style="margin-top: 20px"></div>
+<input style="display:none;width:100px;height: 35px;margin-top: 20px;font-size: 13pt" id="restartBtn" type="button" onclick="restart()" value="重  启">
+
 </body>
 <script>
     var remote = require('electron').remote;
-
-    function ask() {
-        document.body.innerHTML = remote.getGlobal("upgradeMessage");
-        setTimeout(ask,1000);
+    var ipc = require('electron').ipcRenderer;
+    ipc.send("start-download");
+    function restart() {
+        ipc.send("restart");
     }
-    ask();
+    function complete() {
+        document.getElementById("restartBtn").style.display="";
+    }
+    function update(){
+        var upgradeMessages = remote.getGlobal("upgradeMessage");
+        document.getElementById("msg").innerHTML =upgradeMessages;
+    }
 
 </script>
 </html>

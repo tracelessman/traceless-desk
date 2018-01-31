@@ -19,19 +19,17 @@ function isDev(){
 }
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
-
+let mainWindow;
 function createWindow () {
 
     // Create the browser window.
     mainWindow = new BrowserWindow({width: 800, height: 600,titleBarStyle: 'hidden',frame:true});
     global.mainWindow = mainWindow;
     global.appVersion = app.getVersion();
-    //mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
     // and load the index.html of the app.
     checkUpdate(function (hasNew) {
         if(hasNew){
-            global.upgradeMessage="";
             mainWindow.loadURL(url.format({
                 pathname: path.join(__dirname, '/index/update.html'),
                 protocol: 'file:',
@@ -134,6 +132,8 @@ ipc.on('messageRead',function (event,arg) {
     }
 })
 let hasNewVersion = false;
+let latestVersion;
+let files = [];
 function checkUpdate(callback){
     if(isDev()){
         callback(false);
@@ -148,13 +148,14 @@ function checkUpdate(callback){
             })
             response.on('end', () => {
                 let des = JSON.parse(text);
-                let remoteVersion = parseInt(des.version.replace(/\./ig,""));
+                latestVersion = des.version;
+                let remoteVersion = parseInt(latestVersion.replace(/\./ig,""));
                 let curVersion = parseInt(app.getVersion().replace(/\./ig,""));
                 if(remoteVersion>curVersion){
                     hasNewVersion=true;
                     callback(true);
                     let changeList = des.changeList;
-                    let files = ["package.json"];
+                    files = ["package.json"];
                     for(var i=0;i<changeList.length;i++){
                         var change = changeList[i];
                         var vChange = parseInt(change.version.replace(/\./ig,""));
@@ -167,74 +168,13 @@ function checkUpdate(callback){
                             })
                         }
                     }
-                    let counter=0;
-                    let counter2=0;
-                    files.forEach(function (p) {
-                        let req = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/master/"+p);
-                        let index = p.lastIndexOf("/");
-                        let dir;
-                        if(index!=-1){
-                            dir = p.substring(0,p.lastIndexOf("/"));
-                        }
-
-
-                        req.on("response",(rep)=>{
-                            var txt="";
-                            if(rep.statusCode==200){
-                                rep.on("data",(chunk)=>{
-                                    txt+=chunk;
-                                });
-                                rep.on("end",()=>{
-                                    if(dir){
-                                        var nd = path.join(__dirname, dir)
-                                        if(!fs.existsSync(nd)){
-                                            fs.mkdirSync(nd);
-                                        }
-                                    }
-                                    fs.writeFile(path.join(__dirname,p),txt,function (err) {
-
-                                        if(err){
-                                           // mainWindow.webContents.send("upgradeMessage",{msg:err});
-                                            global.upgradeMessage += err.toString()+"<br>";
-                                            //dialog.showMessageBox(null,{type:"info",message:err.toString()})
-                                        }else{
-                                            // mainWindow.webContents.send("upgradeMessage",p+" 更新成功");
-                                            global.upgradeMessage += p+" 更新成功...<br>";
-                                            counter++;
-                                            //dialog.showMessageBox("",{message:""});
-                                            if(counter+counter2==files.length){//所有下载成功
-                                                global.upgradeMessage += " 更新完成，准备重启...";
-                                                 app.relaunch();
-                                                 app.exit(0);
-                                            }
-                                        }
-                                    });
-                                });
-                                rep.on('error', (err) => {
-                                    // mainWindow.webContents.send("upgradeMessage",err);
-                                    global.upgradeMessage += err.toString()+"<br>";
-                                    //dialog.showMessageBox(null,{type:"info",message:err.toString()})
-                                });
-                            }else{
-                                if(rep.statusCode==304)
-                                    counter2++;
-                                // mainWindow.webContents.send("upgradeMessage","download "+p+" "+rep.statusCode);
-                                global.upgradeMessage += "download "+p+" "+rep.statusCode+"<br>";
-                                //dialog.showMessageBox(null,{type:"info",message:p+" download err:"+rep.statusCode})
-                            }
-                        });
-                        req.on("error",function (err) {
-                            // mainWindow.webContents.send("upgradeMessage","download "+p+":"+err);
-                            global.upgradeMessage += "download "+p+":"+err.toString()+"<br>";
-                        });
-                        req.end();
-                    })
-
                 }else{
                     callback(false);
                 }
 
             })
+        }else{
+            callback(false);
         }
     })
     request.on("error",function (err) {
@@ -242,6 +182,147 @@ function checkUpdate(callback){
     });
     request.end();
 
+}
+
+ipc.on("remoteVersion-request",function (event,arg) {
+    checkUpdate(function (hasNew) {
+        event.sender.send('remoteVersion-response', latestVersion||app.getVersion());
+    })
+})
+
+ipc.on("upgrade-request",function (event,arg) {
+    checkUpdate(function (hasNew) {
+        if(hasNew){
+            mainWindow.loadURL(url.format({
+                pathname: path.join(__dirname, '/index/update.html'),
+                protocol: 'file:',
+                slashes: true
+            }))
+
+        }else{
+            mainWindow.loadURL(url.format({
+                pathname: path.join(__dirname, '/index/index.html'),
+                protocol: 'file:',
+                slashes: true
+            }))
+        }
+
+    })
+})
+let upgradeMessages = new Map();
+
+ipc.on('start-download', function (event, arg) {
+    download(files);
+})
+
+ipc.on('restart', function (event, arg) {
+    app.relaunch();
+    app.exit(0);
+})
+
+function getUpgradeMessages() {
+    var html = "";
+    upgradeMessages.forEach(function (v,k) {
+        html += k+"---------------------"+v+"<br>";
+    })
+    return html;
+}
+function download(files) {
+    var baseURI = "https://raw.githubusercontent.com/tracelessman/traceless-desk/master/";
+    var index = baseURI.length;
+
+    var count = 0;
+    var count2=0;
+    function changeMsg(f,m) {
+        upgradeMessages.set(f,m);
+        global.upgradeMessage = getUpgradeMessages();
+        mainWindow.webContents.executeJavaScript("update()");
+    }
+    var tmpDir = path.join(__dirname, "_tmp");
+
+    function deleteFolder(p) {
+        var files = [];
+        if( fs.existsSync(p) ) {
+            files = fs.readdirSync(p);
+            files.forEach(function(file){
+                var curPath = path.join(p, file);
+                if(fs.statSync(curPath).isDirectory()) {
+                    deleteFolder(curPath);
+                } else {
+                    fs.unlinkSync(curPath);
+                }
+            });
+            try{
+                fs.rmdirSync(p);
+            }catch(e){
+                var _files = fs.readdirSync(p);
+                _files.forEach(function(file){
+                    dialog.showMessageBox({message:file});
+                });
+            }
+        }
+    }
+    deleteFolder(tmpDir);
+    function copyFiles(srcDir,targetDir){
+        var files = fs.readdirSync(srcDir);
+        files.forEach(function (file) {
+            var curPath = path.join(srcDir, file);
+            var targetPath = path.join(targetDir, file);
+
+            if(fs.statSync(curPath).isDirectory()) { // recurse
+                if(!fs.existsSync(targetPath)){
+                    fs.mkdirSync(targetPath);
+                }
+                copyFiles(curPath,targetPath);
+            } else {
+                //fs.copyFileSync(curPath,targetPath);
+                // var srcS = fs.createReadStream(curPath);
+                // var targetS = fs.createWriteStream(targetPath);
+                // srcS.pipe(targetS);
+                // srcS.destroy();
+                // targetS.destroy();
+                fs.renameSync(curPath,targetPath);
+            }
+        })
+    }
+
+    mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
+        //设置文件存放位置
+        var f = item.getURL().substring(index);
+        item.setSavePath(path.join(tmpDir, f));
+        item.on('updated', (event, state) => {
+            if (state === 'interrupted') {
+                changeMsg(f,"interrupted");
+            } else if (state === 'progressing') {
+                if (item.isPaused()) {
+                    changeMsg(f,"paused");
+                } else {
+                    changeMsg(f,Math.round((item.getReceivedBytes()/item.getTotalBytes())*100)+"%");
+                }
+            }
+        })
+        item.once('done', (event, state) => {
+            count++;
+            if (state === 'completed') {
+                count2++;
+                changeMsg(f,"100%");
+            } else {
+                changeMsg(f,`Download failed: ${state}`);
+            }
+            if(count == files.length){
+                mainWindow.webContents.executeJavaScript("complete()");
+                if(count2==count){
+                    copyFiles(tmpDir, __dirname);
+                    deleteFolder(tmpDir);
+                }
+            }
+        })
+    })
+
+    files.forEach(function (f) {
+        changeMsg(f,"downloading......");
+        mainWindow.webContents.downloadURL(baseURI+f);
+    })
 }
 
 // In this file you can include the rest of your app's specific main process
