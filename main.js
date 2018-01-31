@@ -135,10 +135,7 @@ let hasNewVersion = false;
 let latestVersion;
 let files = [];
 function checkUpdate(callback){
-    if(isDev()){
-        callback(false);
-        return;
-    }
+
     let request = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/master/upgrade.json");
     request.on('response', (response) => {
         let text="";
@@ -175,6 +172,7 @@ function checkUpdate(callback){
             })
         }else{
             callback(false);
+            console.info("check update response.statusCode:"+response.statusCode);
         }
     })
     request.on("error",function (err) {
@@ -310,17 +308,26 @@ function download(files) {
                 changeMsg(f,`Download failed: ${state}`);
             }
             if(count == files.length){
-                mainWindow.webContents.executeJavaScript("complete()");
                 if(count2==count){
-                    copyFiles(tmpDir, __dirname);
-                    deleteFolder(tmpDir);
+                    var targetDir = __dirname;
+                    if(isDev()){
+                        targetDir = path.join(__dirname,"_tmp2");
+
+                        if(!fs.existsSync(targetDir)){
+                            fs.mkdirSync(targetDir)
+                        }
+                    }
+                     copyFiles(tmpDir, targetDir);
+                     deleteFolder(tmpDir);
                 }
+                mainWindow.webContents.executeJavaScript("complete()");
+
             }
         })
     })
 
     files.forEach(function (f) {
-        changeMsg(f,"downloading......");
+        changeMsg(f,"downloading");
         mainWindow.webContents.downloadURL(baseURI+f);
     })
 }
