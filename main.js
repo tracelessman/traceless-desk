@@ -23,7 +23,7 @@ let mainWindow;
 function createWindow () {
 
     // Create the browser window.
-    mainWindow = new BrowserWindow({width: 800, height: 600,titleBarStyle: 'hidden',frame:true});
+    mainWindow = new BrowserWindow({width: 1024, height: 768,titleBarStyle: 'hidden',frame:true});
     global.mainWindow = mainWindow;
     global.appVersion = app.getVersion();
     // mainWindow.webContents.openDevTools();
@@ -155,15 +155,15 @@ function checkUpdate(callback){
                     files = ["package.json"];
                     for(var i=0;i<changeList.length;i++){
                         var change = changeList[i];
-                        var vChange = parseInt(change.version.replace(/\./ig,""));
-                        if(vChange>curVersion&&vChange<=remoteVersion){
+                        // var vChange = parseInt(change.version.replace(/\./ig,""));
+                        // if(vChange>curVersion&&vChange<=remoteVersion){
                             var _cfs = change.files;
                             _cfs.forEach(function (f) {
                                 if(files.indexOf(f)==-1){
                                     files.push(f);
                                 }
                             })
-                        }
+                        // }
                     }
                 }else{
                     callback(false);

@@ -1,5 +1,5 @@
 {
-  "version":"0.1.8",
+  "version":"0.1.9",
   "changeList":[
     {
       "version":"0.1.1",
@@ -37,6 +37,10 @@
       "version":"0.1.8",
       "files":["index/main.html","index/update.html","main.js","mine/mine.html"],
       "detail":["完善代码升级"]
+    },{
+      "version":"0.1.9",
+      "files":["index/main.html","index/update.html","main.js","mine/mine.html"],
+      "detail":["强制更新所有版本变化内容","增大窗口默认尺寸","完善版本大小判断"]
     }
   ]
 

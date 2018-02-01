@@ -5,10 +5,12 @@
     <title>update</title>
 </head>
 <body style="text-align: left;font-size: 11pt;padding-top: 50px;display: flex;flex-direction: row;justify-content: center;align-items: center">
-<div style="width: 300px">
-<div>更新中...</div>
+<div style="width: 400px">
+<div id="title" style="width: 400px;text-align: center">更新中...</div>
 <div id="msg" style="margin-top: 20px"></div>
-<input style="display:none;width:100px;height: 35px;margin-top: 20px;font-size: 13pt" id="restartBtn" type="button" onclick="restart()" value="重  启">
+    <div style="margin-top: 20px; width: 400px;padding-left: 150px">
+        <input style="display:none;width:100px;height: 35px;font-size: 13pt" id="restartBtn" type="button" onclick="restart()" value="重  启">
+    </div>
 </div>
 </body>
 <script>
@@ -20,6 +22,7 @@
     }
     function complete() {
         document.getElementById("restartBtn").style.display="";
+        document.getElementById("title").innerText="更新完成，请重启";
     }
     function update(){
         var upgradeMessages = remote.getGlobal("upgradeMessage");

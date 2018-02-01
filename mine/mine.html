@@ -63,7 +63,9 @@
     document.getElementById("version").innerText = window.top.remote.getGlobal("appVersion");
 
     function doVersionResponse (event,arg) {
-        if(document.getElementById("version").innerText!=arg){
+        var curV = parseInt(window.top.remote.getGlobal("appVersion").replace(/\./ig,""));
+        var remoteV = parseInt(arg.replace(/\./ig,""));
+        if( curV<remoteV){
             document.getElementById("upgrade-btn").disabled=false;
             document.getElementById("upgrade-tip").innerText = arg;
         }

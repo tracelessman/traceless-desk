@@ -82,7 +82,9 @@
   </body>
 <script>
     function doVersionResponse (event,arg) {
-        if( window.top.remote.getGlobal("appVersion")!=arg){
+        var curV = parseInt(window.top.remote.getGlobal("appVersion").replace(/\./ig,""));
+        var remoteV = parseInt(arg.replace(/\./ig,""));
+        if( curV<remoteV){
             document.getElementById("newVersionTip").style.display="";
         }else{
             document.getElementById("newVersionTip").style.display="none";
