@@ -54,24 +54,27 @@
         <iframe id="frame" src="../recent/recent.html"  style="width:100%;height:100%" frameborder="0"></iframe>
       </div>
 
-      <div style="width:100%;height:80px;background-color: #535353;border-right: 1px solid #434343;display: flex;flex-direction: row;align-items: center;justify-content: center">
+      <div style="width:100%;height:100px;background-color: #535353;border-right: 1px solid #434343;display: flex;flex-direction: row;align-items: center;justify-content: center">
         <div style="flex:1;"></div>
-        <div style="width:40px;height:80px;text-align: center;line-height: 80px;">
-            <i id="recent" class="material-icons" style="color: #f9e160;font-size: 32px;cursor: pointer;position: relative;" onmouseover="hoverNavigator('recent')" onmouseout="leaveNavigator('recent')" onclick="selectNavigator('recent')">
+        <div style="width:40px;height:80px;text-align: center;line-height: 80px;position: relative">
+          <div id="notify-msg-num" style='display:none;position:absolute;left:30px;color:white;font-size: 9pt;border:1px solid red;min-width:20px;height:20px;text-align: center;line-height: 17px;border-radius: 10px;background-color: red;'>1</div>
+          <i id="recent" class="material-icons" style="color: #f9e160;font-size: 32px;cursor: pointer;position: relative;" onmouseover="hoverNavigator('recent')" onmouseout="leaveNavigator('recent')" onclick="selectNavigator('recent')">
               chat_bubble_outline
             </i>
-          <!--<i class="material-icons" style="font-size: 16px;color:red;position: absolute;">fiber_manual_record</i>-->
         </div>
         <div style="width:50px"></div>
-        <div style="width:40px;height:80px;text-align: center;line-height: 80px">
-            <i id="contact" class="material-icons" style="color: #a0a0a0;font-size: 32px;cursor: pointer" onmouseover="hoverNavigator('contact')" onmouseout="leaveNavigator('contact')" onclick="selectNavigator('contact')">toc</i>
+        <div style="width:40px;height:80px;text-align: center;line-height: 80px;position: relative">
+          <div id="newContactTip" style='display:none;position:absolute;left:30px;top:10px;font-size: 9pt;border:1px solid red;width:10px;height:10px;border-radius: 10px;background-color: red;'></div>
+          <i id="contact" class="material-icons" style="color: #a0a0a0;font-size: 32px;cursor: pointer;position: relative" onmouseover="hoverNavigator('contact')" onmouseout="leaveNavigator('contact')" onclick="selectNavigator('contact')">
+              toc
+            </i>
+
         </div>
         <div style="width:50px"></div>
-        <div style="width:40px;height:80px;text-align: center;line-height: 80px;">
+        <div style="width:40px;height:80px;text-align: center;line-height: 80px;position: relative">
+          <div id="newVersionTip" style='display:none;position:absolute;left:30px;top:10px;font-size: 9pt;border:1px solid red;width:10px;height:10px;border-radius: 10px;background-color: red;'></div>
           <i id="mine" class="material-icons" style="color: #a0a0a0;font-size: 32px;cursor: pointer;position: relative;" onmouseover="hoverNavigator('mine')" onmouseout="leaveNavigator('mine')" onclick="selectNavigator('mine')">
             person_outline
-            <i id="newVersionTip" class="material-icons" style="font-size: 16px;color:red;position: absolute;display: none;left:20px;top:-4px">fiber_manual_record</i>
-
           </i>
 
         </div>
@@ -95,10 +98,43 @@
         window.top.ipc.send("remoteVersion-request");
         setTimeout(doVersionRequest,60*60*1000);
     }
-    doVersionRequest();
-   // setTimeout(doVersionRequest,60*1000);
+    setTimeout(doVersionRequest,60*1000);
     window.addEventListener("beforeunload", function (event) {
         window.top.ipc.removeListener("remoteVersion-response",doVersionResponse);
+    });
+
+    var notifyMsg = function () {
+        var num = window.top.Store.getTotalNewMSgNum();
+        if(num>0){
+            document.getElementById("notify-msg-num").innerText = num;
+            document.getElementById("notify-msg-num").style.display="";
+        }else{
+            document.getElementById("notify-msg-num").style.display="none";
+            document.getElementById("notify-msg-num").innerText = "";
+        }
+    }
+    window.top.Store.on("receiveMessage",notifyMsg);
+    window.top.Store.on("receiveGroupMessage",notifyMsg);
+    window.top.Store.on("readChatRecords",notifyMsg);
+    window.top.Store.on("readGroupChatRecords",notifyMsg);
+
+    window.addEventListener("beforeunload", function (event) {
+        window.top.Store.un("receiveMessage",notifyMsg);
+        window.top.Store.un("receiveGroupMessage",notifyMsg);
+        window.top.Store.un("readChatRecords",notifyMsg);
+        window.top.Store.un("readGroupChatRecords",notifyMsg);
+    });
+    function refreshReceiveMKFriends() {
+        if(window.top.Store.hasNewReceivedMKFriends())
+            document.getElementById("newContactTip").style.display="";
+        else
+            document.getElementById("newContactTip").style.display="none";
+    }
+    window.top.Store.on("receiveMKFriends",refreshReceiveMKFriends);
+    window.top.Store.on("readNewMKFriends",refreshReceiveMKFriends);
+    window.addEventListener("beforeunload", function (event) {
+        window.top.Store.un("receiveMKFriends",refreshReceiveMKFriends);
+        window.top.Store.un("readNewMKFriends",refreshReceiveMKFriends);
     });
 </script>
 </html>
