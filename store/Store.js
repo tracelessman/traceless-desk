@@ -400,6 +400,17 @@ var Store = {
             }
         });
         return total;
+    },
+    getTheme:function () {
+        return this.keyData._theme||"left";
+    },
+    changeTheme:function () {
+        if(this.getTheme()=="left"){
+            this.keyData._theme = "bottom";
+        }else{
+            this.keyData._theme = "left";
+        }
+        this._save();
     }
     // rejectMKFriends : function (index) {
     //     for(var i=0;i<this.data.length;i++) {

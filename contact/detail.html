@@ -17,10 +17,16 @@
             background-color:white;
             font-size: 10pt;
         }
+        .left .title{
+            display: none;
+        }
+        .bottom .title{
+            width:100%;height:30px;background-color: #636363;line-height: 30px;color:white;padding-left: 20px
+        }
     </style>
 </head>
 <body>
-<div style="width:100%;height:30px;background-color: #636363;line-height: 30px;color:white;padding-left: 20px" >
+<div class="title" >
     <span id="title" ></span>
 </div>
 <div style="width:100%;height:100%;display:flex;flex-direction: column;justify-content: center;align-items: center;margin-top: 10px">
@@ -33,6 +39,7 @@
     <div style="height:50%"></div>
 </div>
 <script>
+    document.body.className = window.top.theme;
     var ps = document.location.href.substring(document.location.href.indexOf("?")+1);
     var params = ps.split("&");
 

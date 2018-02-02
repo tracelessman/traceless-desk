@@ -12,6 +12,52 @@
 
       html, body {
         height: 100%;
+        overflow: hidden;
+      }
+
+      .content{
+        height:100%;width:100%;display:flex;align-items: center;justify-content: center;
+      }
+
+      .left .content{
+        flex-direction: row-reverse;
+      }
+      .bottom .content{
+        flex-direction: column;
+      }
+      .main{
+        display:flex;flex:1;
+      }
+      .left .main{
+        height:100%;
+      }
+      .bottom .main{
+        width:100%;
+      }
+      .navigator{
+        background-color: #535353;display: flex;align-items: center;justify-content: center
+      }
+      .left .navigator{
+        height:100%;width:70px;
+        flex-direction: column;
+      }
+      .bottom .navigator{
+        width:100%;height:100px;
+        flex-direction: row;
+      }
+
+      .left #turn-bottom-theme{
+        display : block;
+      }
+      .left #turn-left-theme{
+        display : none;
+      }
+
+      .bottom #turn-left-theme{
+        display : block;
+      }
+      .bottom #turn-bottom-theme{
+        display : none;
       }
 
       </style>
@@ -48,13 +94,13 @@
     </script>
 
   </head>
-  <body style="overflow: hidden">
-    <div style="height:100%;width:100%;display:flex;flex-direction: column;align-items: center;justify-content: center">
-      <div style="display:flex;flex:1;width:100%;">
+  <body>
+    <div class="content">
+      <div  class="main">
         <iframe id="frame" src="../recent/recent.html"  style="width:100%;height:100%" frameborder="0"></iframe>
       </div>
 
-      <div style="width:100%;height:100px;background-color: #535353;border-right: 1px solid #434343;display: flex;flex-direction: row;align-items: center;justify-content: center">
+      <div class="navigator">
         <div style="flex:1;"></div>
         <div style="width:40px;height:80px;text-align: center;line-height: 80px;position: relative">
           <div id="notify-msg-num" style='display:none;position:absolute;left:30px;color:white;font-size: 9pt;border:1px solid red;min-width:20px;height:20px;text-align: center;line-height: 17px;border-radius: 10px;background-color: red;'>1</div>
@@ -65,7 +111,7 @@
         <div style="width:50px"></div>
         <div style="width:40px;height:80px;text-align: center;line-height: 80px;position: relative">
           <div id="newContactTip" style='display:none;position:absolute;left:30px;top:10px;font-size: 9pt;border:1px solid red;width:10px;height:10px;border-radius: 10px;background-color: red;'></div>
-          <i id="contact" class="material-icons" style="color: #a0a0a0;font-size: 32px;cursor: pointer;position: relative" onmouseover="hoverNavigator('contact')" onmouseout="leaveNavigator('contact')" onclick="selectNavigator('contact')">
+          <i id="contact" class="material-icons" style="color: #d0d0d0;font-size: 32px;cursor: pointer;position: relative" onmouseover="hoverNavigator('contact')" onmouseout="leaveNavigator('contact')" onclick="selectNavigator('contact')">
               toc
             </i>
 
@@ -73,17 +119,27 @@
         <div style="width:50px"></div>
         <div style="width:40px;height:80px;text-align: center;line-height: 80px;position: relative">
           <div id="newVersionTip" style='display:none;position:absolute;left:30px;top:10px;font-size: 9pt;border:1px solid red;width:10px;height:10px;border-radius: 10px;background-color: red;'></div>
-          <i id="mine" class="material-icons" style="color: #a0a0a0;font-size: 32px;cursor: pointer;position: relative;" onmouseover="hoverNavigator('mine')" onmouseout="leaveNavigator('mine')" onclick="selectNavigator('mine')">
+          <i id="mine" class="material-icons" style="color: #d0d0d0;font-size: 32px;cursor: pointer;position: relative;" onmouseover="hoverNavigator('mine')" onmouseout="leaveNavigator('mine')" onclick="selectNavigator('mine')">
             person_outline
           </i>
 
         </div>
         <div style="flex:1"></div>
-
+        <div style="width:40px;height:50px;text-align: center;line-height: 80px;">
+          <i id="turn-bottom-theme" class="material-icons" style="color: #d0d0d0;font-size: 28px;cursor: pointer;" onclick="changeTheme()" >chevron_right</i>
+          <i id="turn-left-theme" class="material-icons" style="color: #d0d0d0;font-size: 28px;cursor: pointer;" onclick="changeTheme()" >
+            chevron_left
+          </i>
+        </div>
       </div>
     </div>
   </body>
 <script>
+    document.body.className = window.top.theme;
+    function changeTheme() {
+        window.top.Store.changeTheme();
+        window.top.location.reload();
+    }
     function doVersionResponse (event,arg) {
         var curV = parseInt(window.top.remote.getGlobal("appVersion").replace(/\./ig,""));
         var remoteV = parseInt(arg.replace(/\./ig,""));

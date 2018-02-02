@@ -21,15 +21,38 @@
             max-height: 200px;
         }
 
+        .title{
+            width:100%;padding-left: 20px;
+        }
+        .bottom .title{
+            height:30px;background-color: #636363;line-height: 30px;color:white;
+        }
+        .left .title{
+            background-color: #f0f0f0;;
+            border-bottom: 1px solid #e0e0e0;
+            height:45px;line-height: 45px;
+            font-size: 12pt;
+            font-weight: 400;
+        }
+        .title i{
+            font-size: 22px;float: right;cursor: pointer;margin-top: 4px;margin-right: 10px;
+        }
+        .bottom .title i{
+            color:#f0f0f0;
+        }
+        .left .title i{
+            margin-top: 14px;margin-right: 10px;
+        }
+
     </style>
 
     <link href="../css/index.css" rel="stylesheet"></link>
 </head>
 <body>
 <div style="width: 100%;height: 100%;display: flex;flex-direction: column;justify-content: flex-end;align-items: center">
-    <div style="width:100%;height:30px;background-color: #636363;line-height: 30px;color:white;padding-left: 20px" >
+    <div class="title" >
         <span id="title" ></span>
-        <i class="material-icons" style="font-size: 22px;float: right;cursor: pointer;margin-top: 4px;margin-right: 10px;color:#f0f0f0" onclick="showDetail()">more_horiz</i>
+        <i class="material-icons" style="" onclick="showDetail()">more_horiz</i>
     </div>
     <div style="width: 100%;flex:1;overflow: hidden;overflow-y: auto" id="records"  ondblclick="showBiggerImage()">
 
@@ -41,6 +64,7 @@
 
 </body>
 <script>
+    document.body.className = window.top.theme;
     function _getMessage(rec) {
         if(rec.text){
             var text;

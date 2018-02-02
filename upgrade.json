@@ -1,5 +1,5 @@
 {
-  "version":"0.1.10",
+  "version":"0.1.11",
   "changeList":[
     {
       "version":"0.1.1",
@@ -45,6 +45,14 @@
       "version":"0.1.10",
       "files":["index/main.html"],
       "detail":["主页面加新消息提示"]
+    },{
+      "version":"0.1.11",
+      "files":["contact/addFriend.html","contact/contact.html","contact/detail.html","contact/request.html",
+        "index/index.html","index/main.html",
+        "recent/addGroup.html","recent/chat.html","recent/default.html","recent/recent.html",
+        "store/Store.js"
+      ],
+      "detail":["提供两种界面主题，并支持主题切换"]
     }
   ]
 

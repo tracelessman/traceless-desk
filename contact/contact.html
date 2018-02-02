@@ -17,6 +17,28 @@
             background-color: #ffffff;
 
         }
+        .title{
+            width:100%;text-align: center;
+        }
+        .bottom .title{
+            height:30px;background-color: #636363;border-right: 1px solid #535353;line-height: 30px;color:white;
+        }
+        .left .title{
+            background-color: #f0f0f0;border-right: 1px solid #d0d0d0;
+            border-bottom: 1px solid #e0e0e0;
+            height:45px;line-height: 45px;
+            font-size: 12pt;
+            font-weight: 400;
+        }
+        .toolbar{
+            width:100%;height:30px;line-height: 30px;border-bottom: 1px solid #f0f0f0;border-right: 1px solid #d0d0d0;
+        }
+        .bottom .toolbar{
+            background-color: #f0f0f0
+        }
+        .left .toolbar{
+            background-color: #ffffff
+        }
     </style>
 
     <link href="../css/index.css" rel="stylesheet"></link>
@@ -25,13 +47,10 @@
 <div style="height:100%;width:100%;display:flex;flex-direction: row;align-items: center">
     <div style="height:100%;width:200px;background-color: #ffffff;display: flex;flex-direction: column;align-items: center;font-size: 10pt;overflow: hidden">
 
-        <div style="width:100%;height:30px;background-color: #636363;border-right: 1px solid #535353;line-height: 30px;text-align: center;color:white;" >
+        <div class="title">
             通讯录
         </div>
-        <!--<div style="width:100%;height:32px;line-height: 32px;cursor: pointer;padding-left: 10px;border-bottom: 1px solid #f0f0f0;border-right: 1px solid #d0d0d0;" onclick="request()">-->
-            <!--<img src="../images/request.png" width="20" height="20" style="float:left;margin-top: 6px;margin-right: 6px;cursor: pointer" >-->
-            <!--好友请求<span style='color:red;font-style: italic;font-size: 9pt;padding-left: 10px' id="newReceiveMKFriends"></span></div>-->
-        <div style="width:100%;height:30px;line-height: 30px;padding-left: 10px;border-bottom: 1px solid #e0e0e0;border-right: 1px solid #d0d0d0;background-color: #f0f0f0" >
+        <div class="toolbar" >
             <i id="newReceiveMKFriends" class="material-icons" style="font-size: 12px;float:right;margin-top: 4px;margin-right: 10px;color:red;visibility: hidden">fiber_manual_record</i>
             <i class="material-icons" style="font-size: 20px;float: right;cursor: pointer;margin-top: 4px;margin-right: -2px;color:#000" onclick="request()">compare_arrows</i>
             <i class="material-icons" style="font-size: 20px;float:right;cursor: pointer;margin-top: 4px;margin-right: 10px;color:#000" onclick="addFriend()">add</i>
@@ -46,6 +65,7 @@
 </body>
 
 <script>
+    document.body.className = window.top.theme;
     var selected = "";
     function hover(name){
         if(selected!=name)
