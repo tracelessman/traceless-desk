@@ -41,26 +41,33 @@
     window.clipboard = require('electron').clipboard;
     window.ipc = require('electron').ipcRenderer;
     window.remote = require('electron').remote;
+    window.qr = require('qr-image');
+    window.os = require("os");
+    window.ws = require("ws");
     Store.fetchAllKeys((data)=>{
         if(data&&data.length>0){
 
             var cur = data[0];
 
-//            Store.setCurrentClientId(cur.id) ;
+//            Store.setCurrentUid(cur.id) ;
 //            document.getElementById("frame").src="main.html";
-            WSChannel.login(cur.name,cur.id,cur.server,(d,error)=>{
-                if(!error){
-                    Store.setCurrentClientId(cur.id) ;
+            WSChannel.login(cur.name,cur.id,cur.server,(msg)=>{
+                //Store.setCurrentUid(cur.id) ;
+                if(!msg.err){
                     window.theme = document.body.className = Store.getTheme();
                     document.getElementById("frame").src="main.html";
                 }else{
-                    alert(error);
+                    alert(msg.err);
                     document.getElementById("frame").src="login.html";
                 }
+
+            },()=>{
+                alert("无法登录服务器");
+                document.getElementById("frame").src="login.html";
             });
 
         }else{
-            document.getElementById("frame").src="login.html";
+            document.getElementById("frame").src="register.html";
 
         }
     });

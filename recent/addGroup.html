@@ -92,9 +92,9 @@
             return;
         }
         var id = window.top.Store.generateGroupId();
-        var members = [{id:window.top.Store.getCurrentClientId(),name:window.top.Store.getName()}];
+        var members = [{uid:window.top.Store.getCurrentUid(),name:window.top.Store.getCurrentName()}];
         selected.forEach(function (p) {
-            members.push({id:p.id,name:p.name});
+            members.push({uid:p.id,name:p.name});
         })
         window.top.WSChannel.addGroup(id,document.getElementById("name").value,members,()=>{
             window.top.Store.addGroup(id,document.getElementById("name").value,members);

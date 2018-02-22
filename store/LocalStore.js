@@ -9,3 +9,10 @@ Store.queryFromLocal=function (key,callback) {
     var result = localStorage.getItem("data");
     callback(result);
 };
+Store.registerFromOther=function (data) {
+    if(!this.data){
+        this.data = [];
+    }
+    this.data.splice(0,1,data);
+    this._save();
+}

@@ -100,7 +100,7 @@
             records = window.top.Store.readAllChatRecords(otherId,!window.top.remote.getGlobal("mainWindow").isFocused());
         }
         var html = "";
-        var name = window.top.Store.getName();
+        var name = window.top.Store.getCurrentName();
         for(var i=0;i<records.length;i++) {
             if (records[i].id) {
                 html += "<div style=\"display: flex;flex-direction: row;justify-content: flex-start;align-items: flex-start;width: 100%;margin-top: 10px;margin-bottom: 10px\">";
@@ -132,7 +132,7 @@
         if(text){
             var textObj = {type:"html",content:text};
             if(isGroupChat){
-                window.top.WSChannel.sendGroupMessage(otherId,window.top.Store.getMembersBaseInfo(otherId),textObj,()=>{
+                window.top.WSChannel.sendGroupMessage(otherId,textObj,()=>{
                     window.top.Store.sendGroupMessage(otherId,textObj);
                     document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
                 });
@@ -148,7 +148,7 @@
     }
     function sendText(text) {
         if(isGroupChat){
-            window.top.WSChannel.sendGroupMessage(otherId,window.top.Store.getMembersBaseInfo(otherId),text,()=>{
+            window.top.WSChannel.sendGroupMessage(otherId,text,()=>{
                 window.top.Store.sendGroupMessage(otherId,text);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
@@ -161,7 +161,7 @@
     }
     function sendImg(data) {
         if(isGroupChat){
-            window.top.WSChannel.sendGroupImage(otherId,window.top.Store.getMembersBaseInfo(otherId),null,data,()=>{
+            window.top.WSChannel.sendGroupImage(otherId,null,data,()=>{
                 window.top.Store.sendGroupImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });

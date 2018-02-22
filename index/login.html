@@ -12,6 +12,10 @@
 
         html, body {
             height: 100%;
+            font-size: 10pt;
+        }
+        Button{
+            font-size: 10pt;
         }
     </style>
 </head>
@@ -26,20 +30,27 @@
     </div>
     <div style="width: 300px;height:1px;overflow: hidden;background-color: #f0f0f0"></div>
     <div style="display:flex;flex-direction: row;justify-content: center;align-items: center;width:300px;height:40px;">
-        <span>身&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;份&nbsp;&nbsp;&nbsp;&nbsp;</span><input id="clientId" style="height:35px;flex:1;border:none"><button id="refresh" style="border:none;background-color: white"  onclick="generateKey()"><img src="../images/refresh.png" width="20" height="20" style="cursor:pointer"></button>
+        <span>身&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;份&nbsp;&nbsp;&nbsp;&nbsp;</span><input id="clientId" style="height:35px;flex:1;border:none">
     </div>
     <div style="width: 300px;height:1px;overflow: hidden;background-color: #f0f0f0"></div>
     <div style="width:300px;height:40px;border-radius: 5px;text-align: center;border: 1px solid #d0d0d0;line-height: 40px;margin-top: 20px;cursor: pointer;background-color: #f0f0f0" onclick="login()">
         登&nbsp;&nbsp;&nbsp;&nbsp;录
     </div>
+    <div style="width:300px;height:40px;text-align: right;line-height: 40px;margin-top: 10px;cursor: pointer;" onclick="_reset()">
+        重&nbsp;&nbsp;&nbsp;&nbsp;置>>
+    </div>
 </div>
 </body>
 <script>
-    if(window.top.Store.getCurrentClientId()){
-        document.getElementById("name").value=window.top.Store.keyData.name;
-        document.getElementById("ip").value=window.top.Store.keyData.server;
-        document.getElementById("clientId").value=window.top.Store.keyData.id;
+    if(window.top.Store.getCurrentUid()){
+        document.getElementById("name").value=window.top.Store.getCurrentName();
+        document.getElementById("ip").value=window.top.Store.getCurrentServer();
+        document.getElementById("clientId").value=window.top.Store.getCurrentUid();
 
+    }
+    function _reset() {
+        window.top.Store.reset();
+        window.top.document.location.reload();
     }
     function login() {
         if(!document.getElementById("name").value){
@@ -54,12 +65,12 @@
             alert("您还未有身份，请申请身份");
             return;
         }
-        window.top.WSChannel.login(document.getElementById("name").value,document.getElementById("clientId").value,document.getElementById("ip").value,(data,error)=>{
-            if(!error){
-                window.top.Store.setCurrentClientId(document.getElementById("clientId").value);
+        window.top.WSChannel.login(document.getElementById("name").value,document.getElementById("clientId").value,document.getElementById("ip").value,(msg)=>{
+            if(!msg.err){
+                //window.top.Store.setCurrentUid(document.getElementById("clientId").value);
                 document.location.href = "main.html";
             }else{
-                alert(error);
+                alert(msg.err);
             }
         });
 

@@ -24,9 +24,15 @@ function createWindow () {
 
     // Create the browser window.
     mainWindow = new BrowserWindow({width: 1024, height: 768,titleBarStyle: 'hidden',frame:true});
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, '/index/loading.html'),
+        protocol: 'file:',
+        slashes: true
+    }))
     global.mainWindow = mainWindow;
     global.appVersion = app.getVersion();
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
+
     // and load the index.html of the app.
     checkUpdate(function (hasNew) {
         if(hasNew){
@@ -105,7 +111,7 @@ ipc.on('openImageBrowser', function (event, arg) {
     }))
     imageBrowser.setSize(arg.width+100,arg.height+100);
     imageBrowser.center();
-    imageBrowser.setAlwaysOnTop(true)
+    imageBrowser.setAlwaysOnTop(false)
     imageBrowser.show();
 })
 
@@ -176,6 +182,7 @@ function checkUpdate(callback){
         }
     })
     request.on("error",function (err) {
+        callback(false);
         console.info(err.toString());
     });
     request.end();

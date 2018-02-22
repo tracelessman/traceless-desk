@@ -58,8 +58,8 @@
 </div>
 </body>
 <script>
-    document.getElementById("id").innerText = window.top.Store.getCurrentClientId();
-    document.getElementById("name").innerText = window.top.Store.getName();
+    document.getElementById("id").innerText = window.top.Store.getCurrentUid();
+    document.getElementById("name").innerText = window.top.Store.getCurrentName();
     document.getElementById("version").innerText = window.top.remote.getGlobal("appVersion");
 
     function doVersionResponse (event,arg) {

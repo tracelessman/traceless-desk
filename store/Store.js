@@ -26,7 +26,7 @@ var Store = {
         }
     },
 
-    clientId:null,
+    uid:null,
 
     _save :function () {
         this.save2Local("data",JSON.stringify(this.data));
@@ -35,7 +35,7 @@ var Store = {
 
     },
 
-    saveKey:function (name,server,id,publicKey,privateKey,) {
+    saveKey:function (name,server,id,publicKey,privateKey) {
         if(!this.data){
             this.data = [];
         }
@@ -73,31 +73,35 @@ var Store = {
     queryFromLocal:function (key,callback) {
 
     },
-    setCurrentClientId:function (id) {
+    setCurrentUid:function (id) {
         for(var i=0;i<this.data.length;i++) {
             var keyData = this.data[i];
             if (keyData.id == id) {
-                this.clientId = id;
+                this.uid = id;
                 this.keyData = keyData;
             }
         }
 
     },
-    getCurrentClientId:function () {
-        return this.clientId;
+    setLoginState:function (b) {
+        this.loginState = b;
     },
-    getName:function () {
-        for(var i=0;i<this.data.length;i++) {
-            var keyData = this.data[i];
-            if (keyData.id == this.clientId) {
-                return keyData.name;
-            }
-        }
+    getLoginState:function () {
+        return this.loginState;
+    },
+    getCurrentUid:function () {
+        return this.uid;
+    },
+    getCurrentName:function () {
+        return this.keyData.name;
+    },
+    getCurrentServer:function () {
+        return this.keyData.server;
     },
     getPublicKey:function () {
         for(var i=0;i<this.data.length;i++) {
             var keyData = this.data[i];
-            if (keyData.id == this.clientId) {
+            if (keyData.id == this.uid) {
                 return keyData.publicKey;
             }
         }
@@ -110,10 +114,10 @@ var Store = {
         return this.keyData.mkfriends.newReceive;
     },
     //接收交友请求
-    receiveMKFriends : function (fromId,fromName,publicKey) {
+    receiveMKFriends : function (fromId,fromName,publicKey,pic) {
         for(var i=0;i<this.data.length;i++) {
             var keyData = this.data[i];
-            if (keyData.id == this.clientId) {
+            if (keyData.id == this.uid) {
                 if(!keyData.mkfriends){
                     keyData.mkfriends={};
                 }
@@ -129,7 +133,7 @@ var Store = {
                     }
                 }
                 if(!update){
-                    keyData.mkfriends.receive.push({name:fromName,id:fromId,publicKey:publicKey,state:0});
+                    keyData.mkfriends.receive.push({name:fromName,id:fromId,publicKey:publicKey,pic:pic,state:0});
                 }
                 keyData.mkfriends.newReceive = true;
                 this._save();
@@ -141,7 +145,7 @@ var Store = {
     fetchAllReceivedMKFriends:function () {
         for(var i=0;i<this.data.length;i++) {
             var keyData = this.data[i];
-            if (keyData.id == this.clientId) {
+            if (keyData.id == this.uid) {
                 if(!keyData.mkfriends){
                     keyData.mkfriends={};
                 }
@@ -162,7 +166,7 @@ var Store = {
     acceptMKFriends : function (id,callback) {
         for(var i=0;i<this.data.length;i++) {
             var keyData = this.data[i];
-            if (keyData.id == this.clientId) {
+            if (keyData.id == this.uid) {
                 var all = keyData.mkfriends.receive;
                 for(var j=0;j<all.length;j++){
                     if(all[j].id==id){
@@ -177,14 +181,14 @@ var Store = {
         }
     },
 
-    addFriend : function (id,name,publicKey) {
+    addFriend : function (id,name,publicKey,pic) {
         var all = this.getAllFriends();
         for(var j=0;j<all.length;j++){
             if(all[j].id==id){
                 return;
             }
         }
-        all.push({id:id,name:name,publicKey:publicKey});
+        all.push({id:id,name:name,publicKey:publicKey,pic:pic});
         this._save();
         this._fire("addFriend",id);
     },
@@ -200,6 +204,15 @@ var Store = {
         }
         return this.keyData.recent;
     },
+    deleteRecent:function (id) {
+        var recents = this.getAllRecent();
+        for(var j=0;j<recents.length;j++){
+            if(recents[j].id==id){
+                recents.splice(j,1);
+                break;
+            }
+        }
+    },
     getFriend:function (id) {
         var all = this.getAllFriends();
         for(var j=0;j<all.length;j++){
@@ -207,6 +220,10 @@ var Store = {
                 return all[j];
             }
         }
+    },
+    truncateFriends:function (friends) {
+        this.keyData.friends = friends;
+        this._save();
     },
     getRecent:function (id,force) {
         var recents = this.getAllRecent();
@@ -268,6 +285,10 @@ var Store = {
         this._save()
         this._fire("sendMessage",targetId);
     },
+    truncateGroups:function (newGroups) {
+        this.keyData.groups = newGroups;
+        this._save();
+    },
     getGroups:function () {
         var groups = this.keyData.groups;
         if(!groups){
@@ -322,7 +343,7 @@ var Store = {
     getMember:function (gid,mid) {
         var g = this._getGroup(gid,true);
         for(var i=0;i<g.members.length;i++){
-            if(g.members[i].id==mid){
+            if(g.members[i].uid==mid){
                 return g.members[i];
             }
         }
@@ -365,9 +386,10 @@ var Store = {
         this._fire("sendGroupMessage",gid);
     },
     reset:function () {
-        this.data = []
-        this.clientId = null;
+        this.data = null;
+        this.uid = null;
         this.keyData = null;
+        this.loginState = false;
         this._save();
     },
     clear:function () {
@@ -381,7 +403,7 @@ var Store = {
             r.newReceive=false;
             r.records=[];
         });
-        this.clientId = null;
+        this.uid = null;
         this.keyData = null;
         this._save();
     },
@@ -411,17 +433,14 @@ var Store = {
             this.keyData._theme = "left";
         }
         this._save();
+    },
+    getPic:function () {
+        return this.keyData.pic;
+    },
+    setPic:function (pic) {
+        this.keyData.pic = pic;
     }
-    // rejectMKFriends : function (index) {
-    //     for(var i=0;i<this.data.length;i++) {
-    //         var keyData = this.data[i];
-    //         if (keyData.id == this.clientId) {
-    //             keyData.mkfriends.receive[index].state=2;
-    //             this._save();
-    //             break;
-    //         }
-    //     }
-    // }
+
 };
 
 //获取本地key，无key就引导下载，有则到主界面

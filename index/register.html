@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>register</title>
+    <style>
+        html, body {
+            height: 100%;
+            font-size: 10pt;
+            font-family: sans-serif;
+            background-color:white;
+            color:#a0a0a0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body style="display: flex;flex-direction: column;justify-content: center;align-items: center">
+<div style="flex:1"></div>
+<div id="content"></div>
+<div style="flex:2;padding-top: 30px" id="msg">扫描授权</div>
+</body>
+<script>
+    var min=2000;
+    var max=9999;
+    var port = 0;
+    function randomPort(){
+        return Math.floor(Math.random()*(max-min+1)+min);
+    }
+    function newServer(){
+        try{
+            port = randomPort();
+            var ws = new window.top.ws.Server({port:port});
+            return ws;
+        }catch(e){
+            console.info(e);
+            return newServer();
+        }
+    }
+
+    var server = newServer();
+
+    server.on('connection', function connection(ws, req) {
+        ws.on('message', function incoming(message) {
+            document.getElementById("msg").innerText="授权中...";
+            var msg = JSON.parse(message);
+//            window.top.WSChannel.register(msg.server,msg.id,msg.name,(data)=>{
+//                if(data.err){
+//                    alert(data.err);
+//                    var data={};
+//                    data.msg = "目标设备注册发生错误:"+data.err;
+//                    data.state=0;
+//                    ws.send(JSON.stringify(data));
+//                }else{
+                    var data={};
+                    data.state=1;
+                    data.msg = "授权成功";
+                    ws.send(JSON.stringify(data));
+                    document.getElementById("msg").innerText="授权成功";
+                    window.top.Store.registerFromOther(msg);
+                    server.close();
+                    window.top.location.reload();
+//                }
+//            },()=>{
+//                document.getElementById("msg").innerText="无法得到服务器的正确响应";
+//                var data={};
+//                data.msg = "目标设备无法得到服务器的正确响应";
+//                data.state=0;
+//                ws.send(JSON.stringify(data));
+//            });
+        });
+        ws.on('close',function (msg) {
+
+        });
+    });
+    server.on('error',function (err) {
+        console.info("ws server error:"+err);
+    });
+
+    window.addEventListener("beforeunload", function (event) {
+        server.close();
+    });
+
+    function getIPAdress(){
+        var interfaces = window.top.os.networkInterfaces();
+        for(var devName in interfaces){
+            var iface = interfaces[devName];
+            for(var i=0;i<iface.length;i++){
+                var alias = iface[i];
+                if(alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal){
+                    return alias.address;
+                }
+            }
+        }
+    }
+    //var code = window.top.qr.image("test",{type:"png"});
+    var data = {};
+    data.code="traceless";
+    data.action="register";
+    data.uri=getIPAdress()+":"+port;
+    var svg_string = window.top.qr.imageSync(JSON.stringify(data), { type: 'svg',size:5});
+    document.getElementById("content").innerHTML = svg_string;
+</script>
+</html>
