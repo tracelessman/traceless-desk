@@ -95,7 +95,7 @@
     //var code = window.top.qr.image("test",{type:"png"});
     var data = {};
     data.code="traceless";
-    data.action="register";
+    data.action="authorize";
     data.uri=getIPAdress()+":"+port;
     var svg_string = window.top.qr.imageSync(JSON.stringify(data), { type: 'svg',size:5});
     document.getElementById("content").innerHTML = svg_string;
