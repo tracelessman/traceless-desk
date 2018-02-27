@@ -81,22 +81,25 @@
     });
 
     function getIPAdress(){
+        var ips=[];
         var interfaces = window.top.os.networkInterfaces();
         for(var devName in interfaces){
             var iface = interfaces[devName];
             for(var i=0;i<iface.length;i++){
                 var alias = iface[i];
                 if(alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal){
-                    return alias.address;
+                    ips.push(alias.address);
                 }
             }
         }
+        return ips;
     }
     //var code = window.top.qr.image("test",{type:"png"});
     var data = {};
     data.code="traceless";
     data.action="authorize";
-    data.uri=getIPAdress()+":"+port;
+    data.addresses=getIPAdress();
+    data.port = port;
     var svg_string = window.top.qr.imageSync(JSON.stringify(data), { type: 'svg',size:5});
     document.getElementById("content").innerHTML = svg_string;
 </script>
