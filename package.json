@@ -1,14 +1,19 @@
 {
   "name": "traceless",
   "version": "0.1.11",
-  "main": "main.js",
+  "main": "./main.bundle.js",
   "scripts": {
-    "start": "electron ."
+    "start": "node build.js && electron ."
   },
   "devDependencies": {
-    "electron": "~1.7.9"
+    "babel-loader": "^7.1.3",
+    "babili-webpack-plugin": "^0.1.2",
+    "del": "^3.0.0",
+    "electron": "~1.7.9",
+    "webpack": "^4.0.1"
   },
   "dependencies": {
+    "multispinner": "^0.2.1",
     "qr-image": "^3.2.0",
     "ws": "^4.0.0"
   }
