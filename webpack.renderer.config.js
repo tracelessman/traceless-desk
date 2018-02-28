@@ -5,6 +5,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const { dependencies } = require('./package.json')
 
 module.exports ={
     target: 'electron-renderer',
@@ -15,7 +16,26 @@ module.exports ={
         path: path.join(__dirname, 'index'),
         filename: '[name].bundle.js'
     },
-    module: {
-        rules: []
+    externals: {
+        sqlite3: "commonjs sqlite3",
     },
+    node: {
+        __dirname: process.env.NODE_ENV !== 'production',
+        __filename: process.env.NODE_ENV !== 'production'
+    },
+    plugins: [
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NoEmitOnErrorsPlugin()
+    ],
+    module: {
+        rules: [
+            {
+                test: /\.node$/,
+                use: 'node-loader'
+            }
+        ]
+    },
+    resolve: {
+        extensions: ['.js', '.node']
+    }
 };

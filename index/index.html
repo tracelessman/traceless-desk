@@ -38,6 +38,8 @@
 </body>
 <script src="./index.bundle.js"></script>
 <script>
+
+
     window.top.Store.fetchAllKeys((data)=>{
         if(data&&data.length>0){
 
@@ -65,6 +67,21 @@
 
         }
     });
+    window.sqlite3 = require("../asars/sqlite3.asar");
+    //测试sqlite
+//    window.db = new (window.sqlite3).Database(window.path.join(__dirname, '/traceless.db').replace('/app.asar',''),function() {
+//        db.run("create table test(name varchar(15))",function(){
+//            db.run("insert into test values('hello,world')",function(){
+//                db.all("select * from test",function(err,res){
+//                    if(!err)
+//                        console.log("sqliteTest:"+JSON.stringify(res));
+//                    else
+//                        console.error("sqliteTest error:"+err);
+//                });
+//            })
+//        });
+//    });
+
     var notifyNewMsg = function (id) {
         ipc.send("messageReceive",{total:Store.getTotalNewMSgNum()});
 

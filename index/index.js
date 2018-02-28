@@ -4,3 +4,5 @@ window.remote = require('electron').remote;
 window.qr = require('qr-image');
 window.os = require("os");
 window.ws = require("ws");
+window.path = require("path");
+
