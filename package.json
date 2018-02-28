@@ -4,7 +4,9 @@
   "main": "./main.bundle.js",
   "scripts": {
     "start": "electron ./main.js",
-    "publish": "node build.js && electron ."
+    "build": "node build.js",
+    "publish": "node build.js && electron .",
+    "dev": "node build.js && electron ./main.js"
   },
   "devDependencies": {
     "babel-loader": "^7.1.3",
