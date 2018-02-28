@@ -3,7 +3,8 @@
   "version": "0.1.11",
   "main": "./main.bundle.js",
   "scripts": {
-    "start": "node build.js && electron ."
+    "start": "electron ./main.js",
+    "publish": "node build.js && electron ."
   },
   "devDependencies": {
     "babel-loader": "^7.1.3",
@@ -13,7 +14,6 @@
     "webpack": "^4.0.1"
   },
   "dependencies": {
-    "multispinner": "^0.2.1",
     "qr-image": "^3.2.0",
     "ws": "^4.0.0"
   }
