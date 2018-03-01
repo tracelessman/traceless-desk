@@ -53,6 +53,11 @@
         "store/Store.js"
       ],
       "detail":["提供两种界面主题，并支持主题切换"]
+    },{
+      "version":"0.1.12",
+      "files":["main.js"
+      ],
+      "detail":["新的通过publish分支进行升级的方案"]
     }
   ]
 

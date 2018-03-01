@@ -142,7 +142,7 @@ let latestVersion;
 let files = [];
 function checkUpdate(callback){
 
-    let request = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/master/upgrade.json");
+    let request = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/publish/upgrade.json");
     request.on('response', (response) => {
         let text="";
         if(response.statusCode==200){
@@ -233,7 +233,7 @@ function getUpgradeMessages() {
     return html;
 }
 function download(files) {
-    var baseURI = "https://raw.githubusercontent.com/tracelessman/traceless-desk/master/";
+    var baseURI = "https://raw.githubusercontent.com/tracelessman/traceless-desk/publish/";
     var index = baseURI.length;
 
     var count = 0;
