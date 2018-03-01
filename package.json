@@ -1,7 +1,7 @@
 {
   "name": "traceless",
   "version": "0.1.12",
-  "main": "./main.bundle.js",
+  "main": "./main.js",
   "scripts": {
     "start": "electron ./main.js",
     "build": "node build.js",
