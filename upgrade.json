@@ -53,6 +53,14 @@
         "store/Store.js"
       ],
       "detail":["提供两种界面主题，并支持主题切换"]
+    },{
+      "version":"0.2.0",
+      "files":["channel/WSChannel.js","contact/addFriend.html","index/index.html",
+        "index/loading.html","index/login.html","index/register.html","mine/mine.html",
+        "recent/addGroup.html","recent/chat.html","store/Store.js","store/LocalStore.js",
+        "asars/sqlite3.asar","index/index.bundle.js","main.bundle.js"
+      ],
+      "detail":["支持一账户多设备，扫码注册，webpack打包"]
     }
   ]
 
