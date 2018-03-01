@@ -11,6 +11,7 @@ const fs = require('fs');
 const nativeImage = require('electron').nativeImage;
 const net = electron.net
 const dialog = electron.dialog
+var originalFs = require('original-fs');
 
 function isDev(){
     const getFromEnv = parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
@@ -140,6 +141,22 @@ ipc.on('messageRead',function (event,arg) {
 let hasNewVersion = false;
 let latestVersion;
 let files = [];
+function compareVersion(v1,v2){
+    var v1s = v1.split(".");
+    var v2s = v2.split(".");
+    for(var i=0;i<3;i++){
+        var n1 = parseInt(v1s[i]);
+        var n2 = parseInt(v2s[i]);
+        if(n1>n2){
+            return 1;
+        }else if(n1==n2){
+
+        }else{
+            return -1;
+        }
+    }
+    return 0;
+}
 function checkUpdate(callback){
 
     let request = net.request("https://raw.githubusercontent.com/tracelessman/traceless-desk/publish/upgrade.json");
@@ -152,9 +169,7 @@ function checkUpdate(callback){
             response.on('end', () => {
                 let des = JSON.parse(text);
                 latestVersion = des.version;
-                let remoteVersion = parseInt(latestVersion.replace(/\./ig,""));
-                let curVersion = parseInt(app.getVersion().replace(/\./ig,""));
-                if(remoteVersion>curVersion){
+                if(compareVersion(latestVersion,app.getVersion())==1){
                     hasNewVersion=true;
                     callback(true);
                     let changeList = des.changeList;
@@ -251,7 +266,7 @@ function download(files) {
             files = fs.readdirSync(p);
             files.forEach(function(file){
                 var curPath = path.join(p, file);
-                if(fs.statSync(curPath).isDirectory()) {
+                if(fs.statSync(curPath).isDirectory()&&!curPath.endsWith(".asar")) {
                     deleteFolder(curPath);
                 } else {
                     fs.unlinkSync(curPath);
@@ -275,10 +290,15 @@ function download(files) {
             var targetPath = path.join(targetDir, file);
 
             if(fs.statSync(curPath).isDirectory()) { // recurse
-                if(!fs.existsSync(targetPath)){
-                    fs.mkdirSync(targetPath);
+                if(curPath.endsWith(".asar")){
+                    originalFs.writeFileSync(targetPath,originalFs.readFileSync(curPath));
+                }else{
+                    if(!fs.existsSync(targetPath)){
+                        fs.mkdirSync(targetPath);
+                    }
+                    copyFiles(curPath,targetPath);
                 }
-                copyFiles(curPath,targetPath);
+
             } else {
                 //fs.copyFileSync(curPath,targetPath);
                 // var srcS = fs.createReadStream(curPath);
