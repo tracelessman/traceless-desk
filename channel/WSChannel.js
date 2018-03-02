@@ -93,8 +93,8 @@ var WSChannel={
                 callback(this.ws);
         }
     },
-    register:function (ip,uid,name,publicKey,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("register",{uid:uid,name:name,publicKey:publicKey},callback)
+    register:function (ip,uid,name,publicKey,checkCode,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("register",{uid:uid,name:name,publicKey:publicKey,checkCode:checkCode},callback)
         this._sendRequest(req,timeoutCallback,ip);
     },
     _timeoutHandler : function (reqId,callback) {
@@ -162,18 +162,18 @@ var WSChannel={
         this._sendRequest(req,timeoutCallback);
     },
     applyMakeFriends:function (targetId,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("applyMakeFriends",{name:Store.getCurrentName(),publicKey:Store.getPublicKey(),pic:Store.getPic()},callback,targetId);
+        var req = WSChannel.newRequestMsg("applyMakeFriends",{name:Store.getCurrentName(),publicKey:Store.getPublicKey()},callback,targetId);
         this._sendRequest(req,timeoutCallback);
     },
     applyMakeFriendsHandler:function(msg){
-        Store.receiveMKFriends(msg.uid,msg.data.name,msg.data.publicKey,msg.data.pic);
+        Store.receiveMKFriends(msg.uid,msg.data.name,msg.data.publicKey);
     },
     acceptMakeFriends:function (targetId,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("acceptMakeFriends",{name:Store.getCurrentName(),publicKey:Store.getPublicKey(),pic:Store.getPic()},callback,targetId);
+        var req = WSChannel.newRequestMsg("acceptMakeFriends",{name:Store.getCurrentName(),publicKey:Store.getPublicKey()},callback,targetId);
         this._sendRequest(req,timeoutCallback);
     },
     acceptMakeFriendsHandler:function(msg){
-        Store.addFriend(msg.uid,msg.data.name,msg.data.publicKey,msg.data.pic);
+        Store.addFriend(msg.uid,msg.data.name,msg.data.publicKey);
     },
     sendMessage:function (targetId,text,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendMessage",{text:text},callback,targetId);
@@ -224,17 +224,6 @@ var WSChannel={
         }
 
         this._timeoutHandler(req.id,timeoutCallback);
-    },
-    setPersonalPic:function (pic,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("setPersonalPic",{pic:pic},callback);
-        this._sendRequest(req,timeoutCallback);
-    },
-    addNewMembers:function (gid,members,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("addNewMembers",{groupId:gid,members:members},callback);
-        this._sendRequest(req,timeoutCallback);
-    },
-    addNewMembersHandler:function (msg) {
-
     }
 };
 

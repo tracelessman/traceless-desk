@@ -114,7 +114,7 @@ var Store = {
         return this.keyData.mkfriends.newReceive;
     },
     //接收交友请求
-    receiveMKFriends : function (fromId,fromName,publicKey,pic) {
+    receiveMKFriends : function (fromId,fromName,publicKey) {
         for(var i=0;i<this.data.length;i++) {
             var keyData = this.data[i];
             if (keyData.id == this.uid) {
@@ -133,7 +133,7 @@ var Store = {
                     }
                 }
                 if(!update){
-                    keyData.mkfriends.receive.push({name:fromName,id:fromId,publicKey:publicKey,pic:pic,state:0});
+                    keyData.mkfriends.receive.push({name:fromName,id:fromId,publicKey:publicKey,state:0});
                 }
                 keyData.mkfriends.newReceive = true;
                 this._save();
@@ -181,14 +181,14 @@ var Store = {
         }
     },
 
-    addFriend : function (id,name,publicKey,pic) {
+    addFriend : function (id,name,publicKey) {
         var all = this.getAllFriends();
         for(var j=0;j<all.length;j++){
             if(all[j].id==id){
                 return;
             }
         }
-        all.push({id:id,name:name,publicKey:publicKey,pic:pic});
+        all.push({id:id,name:name,publicKey:publicKey});
         this._save();
         this._fire("addFriend",id);
     },
@@ -433,14 +433,17 @@ var Store = {
             this.keyData._theme = "left";
         }
         this._save();
-    },
-    getPic:function () {
-        return this.keyData.pic;
-    },
-    setPic:function (pic) {
-        this.keyData.pic = pic;
     }
-
+    // rejectMKFriends : function (index) {
+    //     for(var i=0;i<this.data.length;i++) {
+    //         var keyData = this.data[i];
+    //         if (keyData.id == this.uid) {
+    //             keyData.mkfriends.receive[index].state=2;
+    //             this._save();
+    //             break;
+    //         }
+    //     }
+    // }
 };
 
 //获取本地key，无key就引导下载，有则到主界面
