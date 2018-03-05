@@ -403,6 +403,8 @@ var Store = {
             r.newReceive=false;
             r.records=[];
         });
+        this.keyData.mkfriends={};
+        this.loginState = false;
         this.uid = null;
         this.keyData = null;
         this._save();

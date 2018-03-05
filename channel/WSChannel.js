@@ -49,8 +49,10 @@ var WSChannel={
                             WSChannel.callbacks[msg.id](msg.data);
                             delete WSChannel.callbacks[msg.id];
                         }
-                    }else{
-                        console.info(message.data)
+                    }else if(msg.fromOtherDevice){
+                        WSChannel[action+"FromOtherDevice"](msg);
+                    }
+                    else{
                         WSChannel[action+"Handler"](msg);
                         WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true}));
                     }
@@ -175,6 +177,9 @@ var WSChannel={
     acceptMakeFriendsHandler:function(msg){
         Store.addFriend(msg.uid,msg.data.name,msg.data.publicKey);
     },
+    acceptMakeFriendsFromOtherDevice:function(msg){
+        Store.addFriend(msg.data.targetUid,msg.data.name,msg.data.publicKey);
+    },
     sendMessage:function (targetId,text,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendMessage",{text:text},callback,targetId);
         this._sendRequest(req,timeoutCallback);
@@ -195,6 +200,9 @@ var WSChannel={
         this._sendRequest(req,timeoutCallback);
     },
     addGroupHandler:function(msg){
+        Store.addGroup(msg.data.groupId,msg.data.groupName,msg.data.members);
+    },
+    addGroupFromOtherDevice:function(msg){
         Store.addGroup(msg.data.groupId,msg.data.groupName,msg.data.members);
     },
     sendGroupMessage:function (groupId,text,callback,timeoutCallback) {
