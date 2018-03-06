@@ -99,12 +99,10 @@ var Store = {
         return this.keyData.server;
     },
     getPublicKey:function () {
-        for(var i=0;i<this.data.length;i++) {
-            var keyData = this.data[i];
-            if (keyData.id == this.uid) {
-                return keyData.publicKey;
-            }
-        }
+        return this.keyData.publicKey;
+    },
+    getPrivateKey:function () {
+        return this.keyData.privateKey;
     },
     //是否有新的还要申请要处理
     hasNewReceivedMKFriends:function () {
