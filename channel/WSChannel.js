@@ -119,14 +119,14 @@ var WSChannel={
                 }
                 WSChannel._lastPongTime = Date.now();
                 if(msg.contacts){
-                    msg.contacts.forEach(function (c) {
-                        var f = Store.getFriend(c.id);
-                        if(f){
-                            for(var i in f){
-                                c[i] = f[i];
-                            }
-                        }
-                    });
+                    // msg.contacts.forEach(function (c) {
+                    //     var f = Store.getFriend(c.id);
+                    //     if(f){
+                    //         for(var i in f){
+                    //             c[i] = f[i];
+                    //         }
+                    //     }
+                    // });
                     Store.truncateFriends(msg.contacts);
                     var res = Store.getAllRecent();
                     for(var i=0;i<res.length;i++){
