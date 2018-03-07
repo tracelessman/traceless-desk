@@ -11,8 +11,9 @@ WSChannel._getRSAInstance = function() {
     }
     return this._RSAInstance;
 }
-WSChannel.encrypt = function (text) {
-    var rsa = this._getRSAInstance();
+WSChannel.encrypt = function (text,pk) {
+    var rsa = new RSAKey();
+    rsa.setPublicString(pk);
     return rsa.encrypt(text);
 }
 WSChannel.decrypt = function (encrypted) {

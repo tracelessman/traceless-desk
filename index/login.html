@@ -65,7 +65,7 @@
             alert("您还未有身份，请申请身份");
             return;
         }
-        window.top.WSChannel.login(document.getElementById("name").value,document.getElementById("clientId").value,document.getElementById("ip").value,(msg)=>{
+        window.top.WSChannel.login(document.getElementById("name").value,document.getElementById("clientId").value,window.top.Store.getClientId(),document.getElementById("ip").value,(msg)=>{
             if(!msg.err){
                 //window.top.Store.setCurrentUid(document.getElementById("clientId").value);
                 document.location.href = "main.html";

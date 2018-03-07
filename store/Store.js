@@ -35,7 +35,7 @@ var Store = {
 
     },
 
-    saveKey:function (name,server,id,publicKey,privateKey) {
+    saveKey:function (name,server,id,publicKey,privateKey,serverPublicKey,cid) {
         if(!this.data){
             this.data = [];
         }
@@ -47,12 +47,14 @@ var Store = {
                 keyData.server = server;
                 keyData.publicKey = publicKey;
                 keyData.privateKey = privateKey;
+                keyData.serverPublicKey = serverPublicKey;
+                keyData.clientId = cid;
                 update = true;
                 break;
             }
         }
         if(!update)
-            this.data.splice(0,1,{name:name,server:server,id:id,publicKey:publicKey,privateKey:privateKey});
+            this.data.splice(0,1,{name:name,server:server,id:id,publicKey:publicKey,privateKey:privateKey,serverPublicKey:serverPublicKey,clientId:cid});
         this._save();
     },
     fetchAllKeys : function (callback) {
@@ -433,6 +435,12 @@ var Store = {
             this.keyData._theme = "left";
         }
         this._save();
+    },
+    getServerPublicKey:function () {
+        return this.keyData.serverPublicKey;
+    },
+    getClientId:function () {
+        return this.keyData.clientId;
     }
     // rejectMKFriends : function (index) {
     //     for(var i=0;i<this.data.length;i++) {

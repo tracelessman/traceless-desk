@@ -69,7 +69,7 @@ var WSChannel={
                         setTimeout(()=>{
                             WSChannel.applyChannel(event.target.ip,function () {
                                 if(Store.getLoginState()){
-                                    WSChannel.login(Store.getCurrentName(),Store.getCurrentUid(),event.target.ip,(data, error)=>{
+                                    WSChannel.login(Store.getCurrentName(),Store.getCurrentUid(),Store.getClientId(),event.target.ip,(data, error)=>{
                                         if(error){
                                             //TODO 统一处理网络异常
                                             alert(error);
@@ -110,9 +110,9 @@ var WSChannel={
         }
 
     },
-    login:function (name,uid,ip,callback,timeoutCallback) {
+    login:function (name,uid,cid,ip,callback,timeoutCallback) {
         Store.setCurrentUid(uid) ;
-        var req = WSChannel.newRequestMsg("login",{name:name,uid:uid},
+        var req = WSChannel.newRequestMsg("login",{name:name,uid:uid,cid:cid},
             function (msg) {
                 if(!msg.err){
                     Store.setLoginState(true);
@@ -180,16 +180,15 @@ var WSChannel={
     acceptMakeFriendsFromOtherDevice:function(msg){
         Store.addFriend(msg.data.targetUid,msg.data.name,msg.data.publicKey);
     },
-    encrypt:function(text){
-        return text
+    encrypt:function(text,pk){
+        return text;
     },
     decrypt:function (encrypted) {
         return encrypted;
     },
     sendMessage:function (targetId,text,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendMessage",{text:this.encrypt(text)},callback,targetId);
+        var req = WSChannel.newRequestMsg("sendMessage",{text:this.encrypt(text,Store.getFriend(targetId).publicKey)},callback,targetId);
         this._sendRequest(req,timeoutCallback);
-
     },
     sendMessageHandler:function(msg){
         Store.receiveMessage(msg.uid,this.decrypt(msg.data.text));
@@ -212,7 +211,7 @@ var WSChannel={
         Store.addGroup(msg.data.groupId,msg.data.groupName,msg.data.members);
     },
     sendGroupMessage:function (groupId,text,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendGroupMessage",{groupId:groupId,text:this.encrypt(text)},callback);
+        var req = WSChannel.newRequestMsg("sendGroupMessage",{groupId:groupId,text:this.encrypt(text,Store.getServerPublicKey())},callback);
         this._sendRequest(req,timeoutCallback);
     },
     sendGroupMessageHandler:function(msg){

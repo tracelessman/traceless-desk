@@ -47,7 +47,7 @@
 
 //            Store.setCurrentUid(cur.id) ;
 //            document.getElementById("frame").src="main.html";
-            WSChannel.login(cur.name,cur.id,cur.server,(msg)=>{
+            WSChannel.login(cur.name,cur.id,cur.clientId,cur.server,(msg)=>{
                 //Store.setCurrentUid(cur.id) ;
                 if(!msg.err){
                     window.theme = document.body.className = Store.getTheme();
