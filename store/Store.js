@@ -28,10 +28,10 @@ var Store = {
 
     uid:null,
 
-    _save :function () {
-        this.save2Local("data",JSON.stringify(this.data));
+    _save :function (callback) {
+        this.save2Local("data",this.data?JSON.stringify(this.data):null,callback);
     },
-    save2Local : function (key,value) {
+    save2Local : function (key,value,callback) {
 
     },
 
@@ -385,14 +385,14 @@ var Store = {
         this._save()
         this._fire("sendGroupMessage",gid);
     },
-    reset:function () {
+    reset:function (callback) {
         this.data = null;
         this.uid = null;
         this.keyData = null;
         this.loginState = false;
-        this._save();
+        this._save(callback);
     },
-    clear:function () {
+    clear:function (callback) {
         var recent = this.getAllRecent();
         recent.forEach(function (r) {
             r.newReceive=false;
@@ -407,7 +407,7 @@ var Store = {
         this.loginState = false;
         this.uid = null;
         this.keyData = null;
-        this._save();
+        this._save(callback);
     },
     getTotalNewMSgNum:function () {
         var recent = this.getAllRecent();
