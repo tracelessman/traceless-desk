@@ -92,6 +92,22 @@
     function showDetail() {
         document.location.href = "../contact/detail.html?"+otherId+"&"+name+"&"+isGroupChat;;
     }
+    function getIconNameByState(state) {
+        if(state===0){
+            return "arrow_upward";
+        }else if(state===1){
+            return "refresh";
+        }else if(state===2){
+            return "done";
+        }else if(state===3){
+            return "check_circle";
+        }else if(state===4){
+            return "drafts";
+        }else if(state===5){
+            return "whatshot";
+        }
+        return "help_outline";
+    }
     function refreshRecordList() {
         var records = [];
         if(isGroupChat){
@@ -113,7 +129,11 @@
                 html += "</div>";
             }else{
                 html+="<div style=\"display: flex;flex-direction: row;justify-content: flex-end;align-items: flex-start;width: 100%;margin-top: 10px;margin-bottom: 10px\">";
+                html+="<i  class=\"material-icons\" style='font-size: 20px;line-height: 40px'>";
+                html+=getIconNameByState(records[i].state);
+                html+="</i>";
                 html+="<div style=\"border:1px solid #d0d0d0;border-radius: 2px;overflow:hidden;padding:10px; \">";
+
                 html += _getMessage(records[i]);
                 html+="</div><div style=\"padding:0px 5px; \">";
                 html+=name;
@@ -154,7 +174,7 @@
             });
         }else{
             window.top.WSChannel.sendMessage(otherId,text,()=>{
-                window.top.Store.sendMessage(otherId,text);
+//                window.top.Store.sendMessage(otherId,text);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }
@@ -218,6 +238,7 @@
 
     window.top.Store.on("receiveMessage",onReceiveMessage);
     window.top.Store.on("sendMessage",onSendMessage);
+    window.top.Store.on("updateMessageState",onSendMessage);
     window.top.Store.on("receiveGroupMessage",onReceiveMessage);
     window.top.Store.on("sendGroupMessage",onSendMessage);
     window.top.ipc.on("mainWindow-focus",onWindowFocus);
@@ -225,6 +246,7 @@
     window.addEventListener("beforeunload", function (event) {
         window.top.Store.un("receiveMessage",onReceiveMessage);
         window.top.Store.un("sendMessage",onSendMessage);
+        window.top.Store.un("updateMessageState",onSendMessage);
         window.top.Store.un("receiveGroupMessage",onReceiveMessage);
         window.top.Store.un("sendGroupMessage",onSendMessage);
         window.top.ipc.removeListener("mainWindow-focus",onWindowFocus);

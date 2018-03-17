@@ -3,6 +3,11 @@
  */
 
 var Store = {
+    MESSAGE_STATE_SENDING:0,
+    MESSAGE_STATE_SERVER_NOT_RECEIVE:1,
+    MESSAGE_STATE_SERVER_RECEIVE:2,
+    MESSAGE_STATE_TARGET_RECEIVE:3,
+    MESSAGE_STATE_TARGET_READ:4,
     _groupSeed:Date.now(),
     _listeners:new Map(),
     on:function (event,fun) {
@@ -241,10 +246,18 @@ var Store = {
     readAllChatRecords : function (id,ignoreState) {
         var recent = this.getRecent(id,true);
         if(recent.newReceive==true&&ignoreState!=true){
+            var readNewNum = recent.newMsgNum;
             recent.newReceive=false;
             recent.newMsgNum=0;
             this._save();
-            this._fire("readChatRecords",id)
+            var readNewMsgs = {};
+            for(var i=recent.records.length-1;i>=recent.records.length-readNewNum;i--){
+                if(!readNewMsgs[recent.records[i].cid]){
+                    readNewMsgs[recent.records[i].cid] = [];
+                }
+                readNewMsgs[recent.records[i].cid].push(recent.records[i].msgId);
+            }
+            this._fire("readChatRecords",{uid:id,readNewMsgs:readNewMsgs})
         }
         return recent.records;
     },
@@ -261,9 +274,9 @@ var Store = {
             return recent.records;
         }
     },
-    receiveMessage:function (fromId,text) {
+    receiveMessage:function (fromId,fromCid,msgId,text) {
         var records = this._getChatRecords(fromId,true,true);
-        records.push({id:fromId,text:text});
+        records.push({id:fromId,cid:fromCid,text:text,msgId:msgId});
         this._save();
         this._fire("receiveMessage",fromId);
     },
@@ -273,11 +286,38 @@ var Store = {
         this._save();
         this._fire("receiveMessage",fromId);
     },
-    sendMessage:function (targetId,text) {
+    sendMessage:function (targetId,text,msgId,callback) {
         var records = this._getChatRecords(targetId,true);
-        records.push({text:text});
-        this._save()
-        this._fire("sendMessage",targetId);
+        records.push({msgId:msgId,text:text,state:Store.MESSAGE_STATE_SENDING});
+        this._save(()=> {
+            if(callback)
+                callback();
+            this._fire("sendMessage",targetId);
+        })
+    },
+    updateMessageState:function (targetId,msgIds,state) {
+        var records = this._getChatRecords(targetId,false);
+        if(records){
+            var update=false;
+            for(var i=0;i<records.length;i++){
+                if(isNaN(msgIds.length)){
+                    if(records[i].msgId == msgIds){
+                        records[i].state = state;
+                        update = true;
+                    }
+                }else{
+                    if(msgIds.indexOf(records[i].msgId) != -1){
+                        records[i].state = state;
+                        update = true;
+                    }
+                }
+
+            }
+            if(update){
+                this._fire("updateMessageState",targetId);
+                this._save();
+            }
+        }
     },
     sendImage:function (targetId,uri,data) {
         var records = this._getChatRecords(targetId,true);
@@ -440,7 +480,8 @@ var Store = {
         return this.keyData.serverPublicKey;
     },
     getClientId:function () {
-        return this.keyData.clientId;
+        if(this.keyData)
+            return this.keyData.clientId;
     }
     // rejectMKFriends : function (index) {
     //     for(var i=0;i<this.data.length;i++) {

@@ -12,11 +12,11 @@ var WSChannel={
     generataMsgId : function () {
         return this.seed++;
     },
-    newRequestMsg:function (action,data,callback,targetUid) {
+    newRequestMsg:function (action,data,callback,targetUid,targetCid) {
         var id = this.generataMsgId();
         if(callback)
             this.callbacks[id] = callback;
-        return  {id:id,action:action,data:data,uid:Store.getCurrentUid(),targetUid:targetUid};//id消息id uid 身份id
+        return  {id:id,action:action,data:data,uid:Store.getCurrentUid(),targetUid:targetUid,cid:Store.getClientId(),targetCid:targetCid};//id消息id uid 身份id
     },
     useChannel:function (callback) {
         this.applyChannel(this.ip,callback);
@@ -43,18 +43,17 @@ var WSChannel={
                 this.ws.onmessage = function incoming(message) {
                     var msg = JSON.parse(message.data);
                     var action = msg.action;
-                    var isResponse = msg.isResponse;
-                    if(isResponse){
+                    if(msg.isResponse){
                         if(WSChannel.callbacks[msg.id]){
-                            WSChannel.callbacks[msg.id](msg.data);
+                            WSChannel.callbacks[msg.id](msg.data,msg.id);
                             delete WSChannel.callbacks[msg.id];
                         }
                     }else if(msg.fromOtherDevice){
                         WSChannel[action+"FromOtherDevice"](msg);
                     }
                     else{
+                        WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true,action:action,id:msg.id,targetUid:msg.uid,targetCid:msg.cid}));
                         WSChannel[action+"Handler"](msg);
-                        WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true}));
                     }
 
                 };
@@ -186,12 +185,21 @@ var WSChannel={
     decrypt:function (encrypted) {
         return encrypted;
     },
-    sendMessage:function (targetId,text,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendMessage",{text:this.encrypt(text,Store.getFriend(targetId).publicKey)},callback,targetId);
-        this._sendRequest(req,timeoutCallback);
+    sendMessage:function (targetId,text,callback) {
+        var req = WSChannel.newRequestMsg("sendMessage",{text:this.encrypt(text,Store.getFriend(targetId).publicKey)},(data,msgId)=>{
+            Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        },targetId);
+        Store.sendMessage(targetId,text,req.id,()=>{
+            if(callback)
+                callback();
+            this._sendRequest(req,()=>{
+                Store.updateMessageState(targetId,req.id,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+            });
+        });
+
     },
     sendMessageHandler:function(msg){
-        Store.receiveMessage(msg.uid,this.decrypt(msg.data.text));
+        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text));
     },
     sendImage:function (targetId,uri,data,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendImage",{data:data},callback,targetId);
@@ -237,9 +245,23 @@ var WSChannel={
         }
 
         this._timeoutHandler(req.id,timeoutCallback);
+    },
+    msgReadStateReport:function (readMsgs,targetUid,targetCid) {
+        var req = WSChannel.newRequestMsg("msgReadStateReport",{readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},null,targetUid,targetCid);
+        WSChannel._sendRequest(req);
+    },
+    msgReadStateReportHandler:function (msg) {
+        Store.updateMessageState(msg.uid,msg.data.readMsgs,msg.data.state);
     }
 };
+Store.on("readChatRecords",function (data) {
+    var uid = data.uid;
+    var readNewMsgs = data.readNewMsgs;
+    for(var cid in readNewMsgs){
+        WSChannel.msgReadStateReport(readNewMsgs[cid],uid,cid);
+    }
 
+});
 function ping() {
     if(WSChannel.ip){
         var deprecated = false;
