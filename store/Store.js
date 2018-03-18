@@ -280,9 +280,9 @@ var Store = {
         this._save();
         this._fire("receiveMessage",fromId);
     },
-    receiveImage:function (fromId,img) {
+    receiveImage:function (fromId,fromCid,msgId,img) {
         var records = this._getChatRecords(fromId,true,true);
-        records.push({id:fromId,img:img});
+        records.push({id:fromId,cid:fromCid,img:img,msgId:msgId});
         this._save();
         this._fire("receiveMessage",fromId);
     },
@@ -320,11 +320,14 @@ var Store = {
         }
     },
 
-    sendImage:function (targetId,uri,data) {
+    sendImage:function (targetId,uri,data,msgId,callback) {
         var records = this._getChatRecords(targetId,true);
-        records.push({img:uri});
-        this._save()
-        this._fire("sendMessage",targetId);
+        records.push({msgId:msgId,img:uri||data,state:Store.MESSAGE_STATE_SENDING});
+        this._save(()=> {
+            if(callback)
+                callback();
+            this._fire("sendMessage",targetId);
+        })
     },
     truncateGroups:function (newGroups) {
         this.keyData.groups = newGroups;
@@ -452,17 +455,20 @@ var Store = {
             }
         }
     },
-    receiveGroupImage:function (fromId,groupId,img) {
+    receiveGroupImage:function (fromId,fromCid,msgId,groupId,img) {
         var records = this._getGroupChatRecords(groupId,true,true);
-        records.push({id:fromId,img:img});
+        records.push({id:fromId,img:img,cid:fromCid,msgId:msgId});
         this._save();
         this._fire("receiveGroupMessage",groupId);
     },
-    sendGroupImage:function (gid,uri,data) {
+    sendGroupImage:function (gid,uri,data,msgId,callback) {
         var records = this._getGroupChatRecords(gid,true);
-        records.push({img:uri});
-        this._save()
-        this._fire("sendGroupMessage",gid);
+        records.push({img:uri||data,msgId:msgId});
+        this._save(()=> {
+            if(callback)
+                callback();
+            this._fire("sendGroupMessage",gid);
+        })
     },
     reset:function (callback) {
         this.data = null;

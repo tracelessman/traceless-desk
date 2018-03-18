@@ -202,11 +202,19 @@ var WSChannel={
         Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text));
     },
     sendImage:function (targetId,uri,data,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendImage",{data:data},callback,targetId);
-        this._sendRequest(req,timeoutCallback);
+        var req = WSChannel.newRequestMsg("sendImage",{data:data},(data,msgId)=>{
+            Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        },targetId);
+        Store.sendImage(targetId,uri,data,req.id,()=>{
+            if(callback)
+                callback();
+            this._sendRequest(req,()=>{
+                Store.updateMessageState(targetId,req.id,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+            });
+        });
     },
     sendImageHandler:function(msg){
-        Store.receiveImage(msg.uid,msg.data.data);
+        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data);
     },
     addGroup:function (groupId,groupName,members,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("addGroup",{groupId:groupId,groupName:groupName,members:members},callback);
@@ -234,11 +242,19 @@ var WSChannel={
         Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text));
     },
     sendGroupImage:function (groupId,uri,data,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendGroupImage",{groupId:groupId,data:data},callback);
-        this._sendRequest(req,timeoutCallback);
+        var req = WSChannel.newRequestMsg("sendGroupImage",{groupId:groupId,data:data},(data,msgId)=>{
+            Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        });
+        Store.sendGroupImage(groupId,uri,data,req.id,()=>{
+            if(callback)
+                callback();
+            this._sendRequest(req,()=>{
+                Store.updateGroupMessageState(groupId,req.id,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+            });
+        });
     },
     sendGroupImageHandler:function(msg){
-        Store.receiveGroupImage(msg.uid,msg.data.groupId,msg.data.data);
+        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data);
     },
 
     _sendRequest:function (req,timeoutCallback,ip) {

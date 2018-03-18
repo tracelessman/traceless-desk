@@ -182,12 +182,12 @@
     function sendImg(data) {
         if(isGroupChat){
             window.top.WSChannel.sendGroupImage(otherId,null,data,()=>{
-                window.top.Store.sendGroupImage(otherId,data);
+//                window.top.Store.sendGroupImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }else{
             window.top.WSChannel.sendImage(otherId,null,data,()=>{
-                window.top.Store.sendImage(otherId,data);
+//                window.top.Store.sendImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }

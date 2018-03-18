@@ -75,4 +75,4 @@ Store.registerFromOther=function (data) {
     data.clientId = UUID();
     this.data.splice(0,1,data);
     this._save();
-}
+};
