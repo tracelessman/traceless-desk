@@ -218,12 +218,20 @@ var WSChannel={
     addGroupFromOtherDevice:function(msg){
         Store.addGroup(msg.data.groupId,msg.data.groupName,msg.data.members);
     },
-    sendGroupMessage:function (groupId,text,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendGroupMessage",{groupId:groupId,text:this.encrypt(text,Store.getServerPublicKey())},callback);
-        this._sendRequest(req,timeoutCallback);
+    sendGroupMessage:function (groupId,text,callback) {
+        var req = WSChannel.newRequestMsg("sendGroupMessage",{groupId:groupId,text:this.encrypt(text,Store.getServerPublicKey())},(data,msgId)=>{
+            Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        });
+        Store.sendGroupMessage(groupId,text,req.id,()=>{
+            if(callback)
+                callback();
+            this._sendRequest(req,()=>{
+                Store.updateGroupMessageState(groupId,req.id,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+            });
+        });
     },
     sendGroupMessageHandler:function(msg){
-        Store.receiveGroupMessage(msg.uid,msg.data.groupId,this.decrypt(msg.data.text));
+        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text));
     },
     sendGroupImage:function (groupId,uri,data,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendGroupImage",{groupId:groupId,data:data},callback);
@@ -252,6 +260,13 @@ var WSChannel={
     },
     msgReadStateReportHandler:function (msg) {
         Store.updateMessageState(msg.uid,msg.data.readMsgs,msg.data.state);
+    },
+    groupMsgReadStateReport:function (gid,readMsgs,targetUid,targetCid) {
+        var req = WSChannel.newRequestMsg("groupMsgReadStateReport",{gid:gid,readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},null,targetUid,targetCid);
+        WSChannel._sendRequest(req);
+    },
+    groupMsgReadStateReportHandler:function (msg) {
+        Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state);
     }
 };
 Store.on("readChatRecords",function (data) {
@@ -262,6 +277,15 @@ Store.on("readChatRecords",function (data) {
     }
 
 });
+Store.on("readGroupChatRecords",function (data) {
+    var gid = data.gid;
+    var readNewMsgs = data.readNewMsgs;
+    for(var uid in readNewMsgs){
+        for(var cid in readNewMsgs[uid]){
+            WSChannel.groupMsgReadStateReport(gid,readNewMsgs[uid][cid],uid,cid)
+        }
+    }
+})
 function ping() {
     if(WSChannel.ip){
         var deprecated = false;

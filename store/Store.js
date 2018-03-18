@@ -319,6 +319,7 @@ var Store = {
             }
         }
     },
+
     sendImage:function (targetId,uri,data) {
         var records = this._getChatRecords(targetId,true);
         records.push({img:uri});
@@ -364,10 +365,21 @@ var Store = {
     readGroupChatRecords:function (id,ignoreState) {
         var g = this._getGroup(id,true);
         if(g.newReceive==true&&ignoreState!=true){
+            var readNewNum = g.newMsgNum;
             g.newReceive=false;
             g.newMsgNum=0;
             this._save();
-            this._fire("readGroupChatRecords",id);
+            var readNewMsgs = {};
+            for(var i=g.records.length-1;i>=g.records.length-readNewNum;i--){
+                if(!readNewMsgs[g.records[i].id]){
+                    readNewMsgs[g.records[i].id] = {};
+                }
+                if(!readNewMsgs[g.records[i].id][g.records[i].cid]){
+                    readNewMsgs[g.records[i].id][g.records[i].cid] = [];
+                }
+                readNewMsgs[g.records[i].id][g.records[i].cid].push(g.records[i].msgId);
+            }
+            this._fire("readGroupChatRecords",{gid:id,readNewMsgs:readNewMsgs});
         }
         return g.records;
     },
@@ -388,9 +400,9 @@ var Store = {
             }
         }
     },
-    receiveGroupMessage:function (fromId,groupId,text) {
+    receiveGroupMessage:function (fromId,fromCid,msgId,groupId,text) {
         var records = this._getGroupChatRecords(groupId,true,true);
-        records.push({id:fromId,text:text});
+        records.push({id:fromId,text:text,cid:fromCid,msgId:msgId});
         this._save();
         this._fire("receiveGroupMessage",groupId);
     },
@@ -407,11 +419,38 @@ var Store = {
             return g.records;
         }
     },
-    sendGroupMessage:function (gid,text) {
+    sendGroupMessage:function (gid,text,msgId,callback) {
         var records = this._getGroupChatRecords(gid,true);
-        records.push({text:text});
-        this._save()
-        this._fire("sendGroupMessage",gid);
+        records.push({text:text,msgId:msgId});
+        this._save(()=> {
+            if(callback)
+                callback();
+            this._fire("sendGroupMessage",gid);
+        })
+    },
+    updateGroupMessageState:function (gid,msgIds,state) {
+        var records = this._getGroupChatRecords(gid,false);
+        if(records){
+            var update=false;
+            for(var i=0;i<records.length;i++){
+                if(isNaN(msgIds.length)){
+                    if(records[i].msgId == msgIds){
+                        records[i].state = state;
+                        update = true;
+                    }
+                }else{
+                    if(msgIds.indexOf(records[i].msgId) != -1){
+                        records[i].state = state;
+                        update = true;
+                    }
+                }
+
+            }
+            if(update){
+                this._fire("updateGroupMessageState",gid);
+                this._save();
+            }
+        }
     },
     receiveGroupImage:function (fromId,groupId,img) {
         var records = this._getGroupChatRecords(groupId,true,true);

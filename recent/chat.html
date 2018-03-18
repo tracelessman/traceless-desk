@@ -169,7 +169,7 @@
     function sendText(text) {
         if(isGroupChat){
             window.top.WSChannel.sendGroupMessage(otherId,text,()=>{
-                window.top.Store.sendGroupMessage(otherId,text);
+//                window.top.Store.sendGroupMessage(otherId,text);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }else{
@@ -239,6 +239,7 @@
     window.top.Store.on("receiveMessage",onReceiveMessage);
     window.top.Store.on("sendMessage",onSendMessage);
     window.top.Store.on("updateMessageState",onSendMessage);
+    window.top.Store.on("updateGroupMessageState",onSendMessage);
     window.top.Store.on("receiveGroupMessage",onReceiveMessage);
     window.top.Store.on("sendGroupMessage",onSendMessage);
     window.top.ipc.on("mainWindow-focus",onWindowFocus);
@@ -247,6 +248,7 @@
         window.top.Store.un("receiveMessage",onReceiveMessage);
         window.top.Store.un("sendMessage",onSendMessage);
         window.top.Store.un("updateMessageState",onSendMessage);
+        window.top.Store.un("updateGroupMessageState",onSendMessage);
         window.top.Store.un("receiveGroupMessage",onReceiveMessage);
         window.top.Store.un("sendGroupMessage",onSendMessage);
         window.top.ipc.removeListener("mainWindow-focus",onWindowFocus);
