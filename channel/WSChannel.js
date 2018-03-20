@@ -12,8 +12,8 @@ var WSChannel={
     generataMsgId : function () {
         return this.seed++;
     },
-    newRequestMsg:function (action,data,callback,targetUid,targetCid) {
-        var id = this.generataMsgId();
+    newRequestMsg:function (action,data,callback,targetUid,targetCid,msgId) {
+        var id = msgId||this.generataMsgId();
         if(callback)
             this.callbacks[id] = callback;
         return  {id:id,action:action,data:data,uid:Store.getCurrentUid(),targetUid:targetUid,cid:Store.getClientId(),targetCid:targetCid};//id消息id uid 身份id
@@ -52,7 +52,8 @@ var WSChannel={
                         WSChannel[action+"FromOtherDevice"](msg);
                     }
                     else{
-                        WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true,action:action,id:msg.id,targetUid:msg.uid,targetCid:msg.cid}));
+                        // WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true,action:action,id:msg.id,targetUid:msg.uid,targetCid:msg.cid}));
+                        WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true}));
                         WSChannel[action+"Handler"](msg);
                     }
 
@@ -198,14 +199,26 @@ var WSChannel={
         });
 
     },
+    resendMessage:function (msgId,targetId,text) {
+        Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SENDING);
+        var req = WSChannel.newRequestMsg("resendMessage",{text:this.encrypt(text,Store.getFriend(targetId).publicKey)},(data)=>{
+            Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        },targetId,null,msgId);
+        this._sendRequest(req,()=>{
+            Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+        });
+    },
     sendMessageHandler:function(msg){
         Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text));
     },
-    sendImage:function (targetId,uri,data,callback,timeoutCallback) {
+    resendMessageHandler:function(msg){
+        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text));
+    },
+    sendImage:function (targetId,data,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendImage",{data:data},(data,msgId)=>{
             Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },targetId);
-        Store.sendImage(targetId,uri,data,req.id,()=>{
+        Store.sendImage(targetId,data,req.id,()=>{
             if(callback)
                 callback();
             this._sendRequest(req,()=>{
@@ -213,7 +226,19 @@ var WSChannel={
             });
         });
     },
+    resendImage:function (msgId,targetId,data) {
+        Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SENDING);
+        var req = WSChannel.newRequestMsg("resendImage",{data:data},(data)=>{
+            Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        },targetId,null,msgId);
+        this._sendRequest(req,()=>{
+            Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+        });
+    },
     sendImageHandler:function(msg){
+        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data);
+    },
+    resendImageHandler:function(msg){
         Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data);
     },
     addGroup:function (groupId,groupName,members,callback,timeoutCallback) {
@@ -238,14 +263,26 @@ var WSChannel={
             });
         });
     },
+    resendGroupMessage:function (msgId,groupId,text) {
+        Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SENDING);
+        var req = WSChannel.newRequestMsg("resendGroupMessage",{groupId:groupId,text:this.encrypt(text,Store.getServerPublicKey())},(data)=>{
+            Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        },null,null,msgId);
+        this._sendRequest(req,()=>{
+            Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+        });
+    },
     sendGroupMessageHandler:function(msg){
         Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text));
     },
-    sendGroupImage:function (groupId,uri,data,callback,timeoutCallback) {
+    resendGroupMessageHandler:function(msg){
+        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text));
+    },
+    sendGroupImage:function (groupId,data,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendGroupImage",{groupId:groupId,data:data},(data,msgId)=>{
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         });
-        Store.sendGroupImage(groupId,uri,data,req.id,()=>{
+        Store.sendGroupImage(groupId,data,req.id,()=>{
             if(callback)
                 callback();
             this._sendRequest(req,()=>{
@@ -253,18 +290,38 @@ var WSChannel={
             });
         });
     },
+    resendGroupImage:function (msgId,groupId,data) {
+        Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SENDING);
+        var req = WSChannel.newRequestMsg("resendGroupImage",{groupId:groupId,data:data},(data)=>{
+            Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        },null,null,msgId);
+        this._sendRequest(req,()=>{
+            Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+        });
+    },
     sendGroupImageHandler:function(msg){
+        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data);
+    },
+    resendGroupImageHandler:function(msg){
         Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data);
     },
 
     _sendRequest:function (req,timeoutCallback,ip) {
         if(ip){
             this.applyChannel(ip,function (ws) {
-                ws.send(JSON.stringify(req));
+                try{
+                    ws.send(JSON.stringify(req));
+                }catch(e){
+                    console.info(e);
+                }
             });
         }else{
             this.useChannel(function (ws) {
-                ws.send(JSON.stringify(req));
+                try{
+                    ws.send(JSON.stringify(req));
+                }catch(e){
+                    console.info(e);
+                }
             });
         }
 

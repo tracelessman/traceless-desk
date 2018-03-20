@@ -108,6 +108,28 @@
         }
         return "help_outline";
     }
+    function resend(msgId){
+        if(isGroupChat){
+            var rec = window.top.Store.getGroupChatRecord(otherId,msgId);
+            if(rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
+                if(rec.text){
+                    window.top.WSChannel.resendGroupMessage(rec.msgId,otherId,rec.text);
+                }else{
+                    window.top.WSChannel.resendGroupImage(rec.msgId,otherId,rec.img)
+                }
+            }
+
+        }else{
+            var rec = window.top.Store.getRecentChatRecord(otherId,msgId);
+            if(rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
+                if(rec.text)
+                    window.top.WSChannel.resendMessage(rec.msgId,otherId,rec.text);
+                else
+                    window.top.WSChannel.resendImage(rec.msgId,otherId,rec.img)
+            }
+
+        }
+    }
     function refreshRecordList() {
         var records = [];
         if(isGroupChat){
@@ -129,7 +151,7 @@
                 html += "</div>";
             }else{
                 html+="<div style=\"display: flex;flex-direction: row;justify-content: flex-end;align-items: flex-start;width: 100%;margin-top: 10px;margin-bottom: 10px\">";
-                html+="<i  class=\"material-icons\" style='font-size: 20px;line-height: 40px'>";
+                html+="<i onclick=\"resend('"+records[i].msgId+"')\"  class=\"material-icons\" style='font-size: 20px;line-height: 40px;"+(records[i].state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE?"cursor: pointer":"")+"'>";
                 html+=getIconNameByState(records[i].state);
                 html+="</i>";
                 html+="<div style=\"border:1px solid #d0d0d0;border-radius: 2px;overflow:hidden;padding:10px; \">";
@@ -181,12 +203,12 @@
     }
     function sendImg(data) {
         if(isGroupChat){
-            window.top.WSChannel.sendGroupImage(otherId,null,data,()=>{
+            window.top.WSChannel.sendGroupImage(otherId,data,()=>{
 //                window.top.Store.sendGroupImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }else{
-            window.top.WSChannel.sendImage(otherId,null,data,()=>{
+            window.top.WSChannel.sendImage(otherId,data,()=>{
 //                window.top.Store.sendImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });

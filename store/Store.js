@@ -320,9 +320,21 @@ var Store = {
         }
     },
 
-    sendImage:function (targetId,uri,data,msgId,callback) {
+    getRecentChatRecord:function (targetId,msgId) {
+        var records = this._getChatRecords(targetId,false);
+        if(records){
+            for(var i=0;i<records.length;i++){
+                if(records[i].msgId == msgId){
+                    return records[i];
+                }
+
+            }
+        }
+    },
+
+    sendImage:function (targetId,data,msgId,callback) {
         var records = this._getChatRecords(targetId,true);
-        records.push({msgId:msgId,img:uri||data,state:Store.MESSAGE_STATE_SENDING});
+        records.push({msgId:msgId,img:data,state:Store.MESSAGE_STATE_SENDING});
         this._save(()=> {
             if(callback)
                 callback();
@@ -424,7 +436,7 @@ var Store = {
     },
     sendGroupMessage:function (gid,text,msgId,callback) {
         var records = this._getGroupChatRecords(gid,true);
-        records.push({text:text,msgId:msgId});
+        records.push({text:text,msgId:msgId,state:Store.MESSAGE_STATE_SENDING});
         this._save(()=> {
             if(callback)
                 callback();
@@ -455,15 +467,25 @@ var Store = {
             }
         }
     },
+    getGroupChatRecord:function (gid,msgId) {
+        var records = this._getGroupChatRecords(gid,false);
+        if(records){
+            for(var i=0;i<records.length;i++){
+                if(records[i].msgId == msgId){
+                    return records[i];
+                }
+            }
+        }
+    },
     receiveGroupImage:function (fromId,fromCid,msgId,groupId,img) {
         var records = this._getGroupChatRecords(groupId,true,true);
         records.push({id:fromId,img:img,cid:fromCid,msgId:msgId});
         this._save();
         this._fire("receiveGroupMessage",groupId);
     },
-    sendGroupImage:function (gid,uri,data,msgId,callback) {
+    sendGroupImage:function (gid,data,msgId,callback) {
         var records = this._getGroupChatRecords(gid,true);
-        records.push({img:uri||data,msgId:msgId});
+        records.push({img:data,msgId:msgId,state:Store.MESSAGE_STATE_SENDING});
         this._save(()=> {
             if(callback)
                 callback();
