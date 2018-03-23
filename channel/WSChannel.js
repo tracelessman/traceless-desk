@@ -339,7 +339,7 @@ var WSChannel={
         WSChannel._sendRequest(req);
     },
     groupMsgReadStateReportHandler:function (msg) {
-        Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state);
+        Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state,msg.uid);
     }
 };
 Store.on("readChatRecords",function (data) {

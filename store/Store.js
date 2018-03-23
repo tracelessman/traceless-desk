@@ -403,7 +403,7 @@ var Store = {
         var  ms = [];
         for(var i=0;i<g.members.length;i++){
             var m = g.members[i];
-            ms.push({id:m.id,name:m.name});
+            ms.push({id:m.uid,name:m.name});
         }
         return ms;
     },
@@ -443,19 +443,24 @@ var Store = {
             this._fire("sendGroupMessage",gid);
         })
     },
-    updateGroupMessageState:function (gid,msgIds,state) {
+    updateGroupMessageState:function (gid,msgIds,state,fromUid) {
         var records = this._getGroupChatRecords(gid,false);
         if(records){
             var update=false;
             for(var i=0;i<records.length;i++){
+                if(!records[i].states){
+                    records[i].states = {};
+                }
                 if(isNaN(msgIds.length)){
                     if(records[i].msgId == msgIds){
                         records[i].state = state;
+                        records[i].states[fromUid] = state;
                         update = true;
                     }
                 }else{
                     if(msgIds.indexOf(records[i].msgId) != -1){
                         records[i].state = state;
+                        records[i].states[fromUid] = state;
                         update = true;
                     }
                 }
@@ -471,7 +476,7 @@ var Store = {
         var records = this._getGroupChatRecords(gid,false);
         if(records){
             for(var i=0;i<records.length;i++){
-                if(records[i].msgId == msgId){
+                if((!records[i].id)&&records[i].msgId == msgId){
                     return records[i];
                 }
             }
