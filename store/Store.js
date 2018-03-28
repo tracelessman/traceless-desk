@@ -453,15 +453,16 @@ var Store = {
                 if(!records[i].states){
                     records[i].states = {};
                 }
+                var newState = records[i].state;
                 if(isNaN(msgIds.length)){
                     if(records[i].msgId == msgIds){
-                        records[i].state = state;
+                        records[i].state = state>records[i].state?state:records[i].state;
                         records[i].states[fromUid] = state;
                         update = true;
                     }
                 }else{
                     if(msgIds.indexOf(records[i].msgId) != -1){
-                        records[i].state = state;
+                        records[i].state = state>records[i].state?state:records[i].state;
                         records[i].states[fromUid] = state;
                         update = true;
                     }
