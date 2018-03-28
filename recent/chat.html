@@ -54,12 +54,20 @@
         <span id="title" ></span>
         <i class="material-icons" style="" onclick="showDetail()">more_horiz</i>
     </div>
-    <div style="width: 100%;flex:1;overflow: hidden;overflow-y: auto" id="records"  ondblclick="showBiggerImage()">
+    <div style="width: 100%;flex:1;display:flex;flex-direction: row;justify-content: flex-end;align-items: center;">
+        <div style="flex:1;display: flex;height:100%;flex-direction: column;justify-content: flex-end;align-items: center">
+            <div style="width: 100%;flex:1;overflow: hidden;overflow-y: auto" id="records"  ondblclick="showBiggerImage()">
 
+            </div>
+            <div style="width: 100%;height:200px;border-top: 1px solid #d0d0d0;display: flex">
+                <iframe id="chatBox" style="flex:1" src="chatBox.html" frameborder="0"></iframe>
+            </div>
+        </div>
+        <div id="detailBox" style="display:flex;height:100%;width:150px;border-left: 1px solid #d0d0d0;display: none;padding: 10px;">
+
+        </div>
     </div>
-    <div style="width: 100%;height:200px;border-top: 1px solid #d0d0d0;display: flex">
-        <iframe id="chatBox" style="flex:1" src="chatBox.html" frameborder="0"></iframe>
-    </div>
+
 </div>
 
 </body>
@@ -92,6 +100,67 @@
     function showDetail() {
         document.location.href = "../contact/detail.html?"+otherId+"&"+name+"&"+isGroupChat;;
     }
+    function getIconNameByState(state) {
+        if(state===0){
+            return "arrow_upward";
+        }else if(state===1){
+            return "refresh";
+        }else if(state===2){
+            return "done";
+        }else if(state===3){
+            return "check_circle";
+        }else if(state===4){
+            return "drafts";
+        }else if(state===5){
+            return "whatshot";
+        }
+        return "help_outline";
+    }
+    function onMsgStateTouch(msgId){
+        if(isGroupChat){
+            var rec = window.top.Store.getGroupChatRecord(otherId,msgId);
+            if(rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
+                if(rec.text){
+                    window.top.WSChannel.resendGroupMessage(rec.msgId,otherId,rec.text);
+                }else{
+                    window.top.WSChannel.resendGroupImage(rec.msgId,otherId,rec.img)
+                }
+            }else{
+                document.getElementById("detailBox").style.display = "";
+                var members =window.top.Store.getGroup(otherId).members;
+                var html="";
+                for(var i=0;i<members.length;i++){
+                    var f = members[i];
+                    if(f.uid!=window.top.Store.getCurrentUid()){
+                        var state = rec.states[f.uid]||rec.state;
+                        var iconName = getIconNameByState(state);
+                        html+="<div style='display: flex;flex-direction: row;justify-content: space-around;align-items: center'><span>";
+                        html+=f.name;
+                        html+="</span><i class=\"material-icons\">";
+                        html+=iconName;
+                        html+="</i> </div>";
+                    }
+                }
+                document.getElementById("detailBox").innerHTML=html;
+            }
+
+        }else{
+            var rec = window.top.Store.getRecentChatRecord(otherId,msgId);
+            if(rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
+                if(rec.text)
+                    window.top.WSChannel.resendMessage(rec.msgId,otherId,rec.text);
+                else
+                    window.top.WSChannel.resendImage(rec.msgId,otherId,rec.img)
+            }
+
+        }
+    }
+    function hideDetaiBox(e) {
+        if(e.target.id!="msgState"){
+            document.getElementById("detailBox").style.display="none";
+        }
+    }
+    document.addEventListener("mousedown",hideDetaiBox)
     function refreshRecordList() {
         var records = [];
         if(isGroupChat){
@@ -101,7 +170,25 @@
         }
         var html = "";
         var name = window.top.Store.getCurrentName();
+        var lastSpTime;
+        var now = new Date();
         for(var i=0;i<records.length;i++) {
+            if(lastSpTime&&records[i].time-lastSpTime>10*60*1000||!lastSpTime){
+                lastSpTime = records[i].time;
+                if(lastSpTime){
+                    var timeStr="";
+                    var date = new Date();
+                    date.setTime(lastSpTime);
+                    if(now.getFullYear()==date.getFullYear()&&now.getMonth()==date.getMonth()&&now.getDate()==date.getDate()){
+                        timeStr+="今天 ";
+                    }else if(now.getFullYear()==date.getFullYear()){
+                        timeStr+=(date.getMonth()+1)+"月"+date.getDate()+"日 ";
+                    }
+                    timeStr+=date.getHours()+":"+(date.getMinutes()<10?"0"+date.getMinutes():date.getMinutes());
+                    html += "<div style=\"marginTop:10;fontSize:11;text-align:center;width:100%;color: #a0a0a0\">"+timeStr+"</div>";
+
+                }
+            }
             if (records[i].id) {
                 html += "<div style=\"display: flex;flex-direction: row;justify-content: flex-start;align-items: flex-start;width: 100%;margin-top: 10px;margin-bottom: 10px\">";
                 html += "<div style=\"padding:0px 5px; \">";
@@ -113,7 +200,11 @@
                 html += "</div>";
             }else{
                 html+="<div style=\"display: flex;flex-direction: row;justify-content: flex-end;align-items: flex-start;width: 100%;margin-top: 10px;margin-bottom: 10px\">";
+                html+="<i id='msgState' onclick=\"onMsgStateTouch('"+records[i].msgId+"')\"  class=\"material-icons\" style='font-size: 20px;line-height: 40px;"+((isGroupChat||records[i].state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE)?"cursor: pointer":"")+"'>";
+                html+=getIconNameByState(records[i].state);
+                html+="</i>";
                 html+="<div style=\"border:1px solid #d0d0d0;border-radius: 2px;overflow:hidden;padding:10px; \">";
+
                 html += _getMessage(records[i]);
                 html+="</div><div style=\"padding:0px 5px; \">";
                 html+=name;
@@ -149,25 +240,25 @@
     function sendText(text) {
         if(isGroupChat){
             window.top.WSChannel.sendGroupMessage(otherId,text,()=>{
-                window.top.Store.sendGroupMessage(otherId,text);
+//                window.top.Store.sendGroupMessage(otherId,text);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }else{
             window.top.WSChannel.sendMessage(otherId,text,()=>{
-                window.top.Store.sendMessage(otherId,text);
+//                window.top.Store.sendMessage(otherId,text);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }
     }
     function sendImg(data) {
         if(isGroupChat){
-            window.top.WSChannel.sendGroupImage(otherId,null,data,()=>{
-                window.top.Store.sendGroupImage(otherId,data);
+            window.top.WSChannel.sendGroupImage(otherId,data,()=>{
+//                window.top.Store.sendGroupImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }else{
-            window.top.WSChannel.sendImage(otherId,null,data,()=>{
-                window.top.Store.sendImage(otherId,data);
+            window.top.WSChannel.sendImage(otherId,data,()=>{
+//                window.top.Store.sendImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }
@@ -218,6 +309,8 @@
 
     window.top.Store.on("receiveMessage",onReceiveMessage);
     window.top.Store.on("sendMessage",onSendMessage);
+    window.top.Store.on("updateMessageState",onSendMessage);
+    window.top.Store.on("updateGroupMessageState",onSendMessage);
     window.top.Store.on("receiveGroupMessage",onReceiveMessage);
     window.top.Store.on("sendGroupMessage",onSendMessage);
     window.top.ipc.on("mainWindow-focus",onWindowFocus);
@@ -225,6 +318,8 @@
     window.addEventListener("beforeunload", function (event) {
         window.top.Store.un("receiveMessage",onReceiveMessage);
         window.top.Store.un("sendMessage",onSendMessage);
+        window.top.Store.un("updateMessageState",onSendMessage);
+        window.top.Store.un("updateGroupMessageState",onSendMessage);
         window.top.Store.un("receiveGroupMessage",onReceiveMessage);
         window.top.Store.un("sendGroupMessage",onSendMessage);
         window.top.ipc.removeListener("mainWindow-focus",onWindowFocus);
