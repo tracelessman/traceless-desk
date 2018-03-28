@@ -1,5 +1,5 @@
 {
-  "version":"0.2.0",
+  "version":"0.3.0",
   "changeList":[
     {
       "version":"0.1.1",
@@ -61,6 +61,11 @@
         "asars/sqlite3.asar","index/index.bundle.js","main.bundle.js"
       ],
       "detail":["支持一账户多设备，扫码注册，webpack打包"]
+    },{
+      "version":"0.3.0",
+      "files":["store/Store.js","store/LocalStore.js","channel/WSChannel.js","channel/LocalWSChannel.js",
+        "index/index.html","index/login.html","mine/mine.html","recent/chat.html"],
+      "detail":[""]
     }
   ]
 
