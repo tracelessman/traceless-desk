@@ -117,7 +117,11 @@ var WSChannel={
                 if(!msg.err){
                     Store.setLoginState(true);
                 }
+                Store.suspendAutoSave();
                 WSChannel._lastPongTime = Date.now();
+                if(msg.serverPublicKey){
+                    Store.truncateServerPublicKey(msg.serverPublicKey);
+                }
                 if(msg.contacts){
                     // msg.contacts.forEach(function (c) {
                     //     var f = Store.getFriend(c.id);
@@ -152,6 +156,8 @@ var WSChannel={
                     });
                     Store.truncateGroups(msg.groups);
                 }
+                Store.resumeAutoSave();
+                Store.foreSave();
 
                 callback(msg);
 

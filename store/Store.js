@@ -34,7 +34,8 @@ var Store = {
     uid:null,
 
     _save :function (callback) {
-        this.save2Local("data",this.data?JSON.stringify(this.data):null,callback);
+        if(!this._suspendSave)
+            this.save2Local("data",this.data?JSON.stringify(this.data):null,callback);
     },
     save2Local : function (key,value,callback) {
 
@@ -217,6 +218,7 @@ var Store = {
                 break;
             }
         }
+        this._save();
     },
     getFriend:function (id) {
         var all = this.getAllFriends();
@@ -548,12 +550,25 @@ var Store = {
         }
         this._save();
     },
+    truncateServerPublicKey:function (key) {
+        this.keyData.serverPublicKey = key;
+        this._save();
+    },
     getServerPublicKey:function () {
         return this.keyData.serverPublicKey;
     },
     getClientId:function () {
         if(this.keyData)
             return this.keyData.clientId;
+    },
+    suspendAutoSave:function(){
+        this._suspendSave = true;
+    },
+    resumeAutoSave:function () {
+        this._suspendSave = false;
+    },
+    foreSave:function (callback) {
+        this._save(callback);
     }
     // rejectMKFriends : function (index) {
     //     for(var i=0;i<this.data.length;i++) {
