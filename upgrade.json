@@ -64,7 +64,7 @@
     },{
       "version":"0.3.0",
       "files":["store/Store.js","store/LocalStore.js","channel/WSChannel.js","channel/LocalWSChannel.js",
-        "index/index.html","index/login.html","mine/mine.html","recent/chat.html","main.bundle.js"],
+        "index/index.html","index/login.html","mine/mine.html","recent/chat.html","main.bundle.js","index/index.bundle.js"],
       "detail":[""]
     }
   ]
