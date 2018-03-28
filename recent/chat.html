@@ -170,7 +170,25 @@
         }
         var html = "";
         var name = window.top.Store.getCurrentName();
+        var lastSpTime;
+        var now = new Date();
         for(var i=0;i<records.length;i++) {
+            if(lastSpTime&&records[i].time-lastSpTime>10*60*1000||!lastSpTime){
+                lastSpTime = records[i].time;
+                if(lastSpTime){
+                    var timeStr="";
+                    var date = new Date();
+                    date.setTime(lastSpTime);
+                    if(now.getFullYear()==date.getFullYear()&&now.getMonth()==date.getMonth()&&now.getDate()==date.getDate()){
+                        timeStr+="今天 ";
+                    }else if(now.getFullYear()==date.getFullYear()){
+                        timeStr+=(date.getMonth()+1)+"月"+date.getDate()+"日 ";
+                    }
+                    timeStr+=date.getHours()+":"+(date.getMinutes()<10?"0"+date.getMinutes():date.getMinutes());
+                    html += "<div style=\"marginTop:10;fontSize:11;text-align:center;width:100%;color: #a0a0a0\">"+timeStr+"</div>";
+
+                }
+            }
             if (records[i].id) {
                 html += "<div style=\"display: flex;flex-direction: row;justify-content: flex-start;align-items: flex-start;width: 100%;margin-top: 10px;margin-bottom: 10px\">";
                 html += "<div style=\"padding:0px 5px; \">";
