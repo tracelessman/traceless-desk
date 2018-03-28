@@ -2,7 +2,6 @@
  * Created by renbaogang on 2018/1/25.
  */
 var WSChannel = require("../channel/WSChannel");
-var RSAKey = require('react-native-rsa');
 WSChannel._getRSAInstance = function() {
     if(!this._RSAInstance){
         this._RSAInstance = new RSAKey();
