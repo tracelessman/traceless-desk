@@ -3,7 +3,8 @@
  */
 var Store = require("../store/Store");
 var UUID = require('uuid/v4');
-var sqlite3 = require('sqlite3');
+// var sqlite3 = require('sqlite3');
+var sqlite3 = require("../asars/sqlite3.asar");
 var db = new sqlite3.cached.Database('traceless.db');
 db.serialize(function () {
     db.run("create table if not exists traceless(id INTEGER PRIMARY KEY NOT NULL,data TEXT)", [], function (err) {
