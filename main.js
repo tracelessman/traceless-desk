@@ -177,14 +177,14 @@ function checkUpdate(callback){
                     for(var i=0;i<changeList.length;i++){
                         var change = changeList[i];
                         // var vChange = parseInt(change.version.replace(/\./ig,""));
-                        // if(vChange>curVersion&&vChange<=remoteVersion){
+                        if(compareVersion(change.version,app.getVersion()==1)){
                             var _cfs = change.files;
                             _cfs.forEach(function (f) {
                                 if(files.indexOf(f)==-1){
                                     files.push(f);
                                 }
                             })
-                        // }
+                        }
                     }
                 }else{
                     callback(false);
