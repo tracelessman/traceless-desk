@@ -251,15 +251,16 @@ var Store = {
             var readNewNum = recent.newMsgNum;
             recent.newReceive=false;
             recent.newMsgNum=0;
-            this._save();
             var readNewMsgs = {};
             for(var i=recent.records.length-1;i>=recent.records.length-readNewNum;i--){
                 if(!readNewMsgs[recent.records[i].cid]){
                     readNewMsgs[recent.records[i].cid] = [];
                 }
                 readNewMsgs[recent.records[i].cid].push(recent.records[i].msgId);
+                recent.records[i].read=true;
             }
-            this._fire("readChatRecords",{uid:id,readNewMsgs:readNewMsgs})
+            this._fire("readChatRecords",{uid:id,readNewMsgs:readNewMsgs});
+            this._save();
         }
         return recent.records;
     },
@@ -385,7 +386,6 @@ var Store = {
             var readNewNum = g.newMsgNum;
             g.newReceive=false;
             g.newMsgNum=0;
-            this._save();
             var readNewMsgs = {};
             for(var i=g.records.length-1;i>=g.records.length-readNewNum;i--){
                 if(!readNewMsgs[g.records[i].id]){
@@ -395,8 +395,10 @@ var Store = {
                     readNewMsgs[g.records[i].id][g.records[i].cid] = [];
                 }
                 readNewMsgs[g.records[i].id][g.records[i].cid].push(g.records[i].msgId);
+                g.records[i].read=true;
             }
             this._fire("readGroupChatRecords",{gid:id,readNewMsgs:readNewMsgs});
+            this._save();
         }
         return g.records;
     },
@@ -453,7 +455,6 @@ var Store = {
                 if(!records[i].states){
                     records[i].states = {};
                 }
-                var newState = records[i].state;
                 if(isNaN(msgIds.length)){
                     if(records[i].msgId == msgIds){
                         records[i].state = state>records[i].state?state:records[i].state;
