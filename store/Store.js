@@ -277,16 +277,16 @@ var Store = {
             return recent.records;
         }
     },
-    receiveMessage:function (fromId,fromCid,msgId,text) {
+    receiveMessage:function (fromId,fromCid,msgId,text,callback) {
         var records = this._getChatRecords(fromId,true,true);
         records.push({id:fromId,cid:fromCid,text:text,msgId:msgId,time:Date.now()});
-        this._save();
+        this._save(callback);
         this._fire("receiveMessage",fromId);
     },
-    receiveImage:function (fromId,fromCid,msgId,img) {
+    receiveImage:function (fromId,fromCid,msgId,img,callback) {
         var records = this._getChatRecords(fromId,true,true);
         records.push({id:fromId,cid:fromCid,img:img,msgId:msgId,time:Date.now()});
-        this._save();
+        this._save(callback);
         this._fire("receiveMessage",fromId);
     },
     sendMessage:function (targetId,text,msgId,callback) {
@@ -419,10 +419,10 @@ var Store = {
             }
         }
     },
-    receiveGroupMessage:function (fromId,fromCid,msgId,groupId,text) {
+    receiveGroupMessage:function (fromId,fromCid,msgId,groupId,text,callback) {
         var records = this._getGroupChatRecords(groupId,true,true);
         records.push({id:fromId,text:text,cid:fromCid,msgId:msgId,time:Date.now()});
-        this._save();
+        this._save(callback);
         this._fire("receiveGroupMessage",groupId);
     },
     _getGroupChatRecords:function (gid, force, newMsg) {
@@ -486,10 +486,10 @@ var Store = {
             }
         }
     },
-    receiveGroupImage:function (fromId,fromCid,msgId,groupId,img) {
+    receiveGroupImage:function (fromId,fromCid,msgId,groupId,img,callback) {
         var records = this._getGroupChatRecords(groupId,true,true);
         records.push({id:fromId,img:img,cid:fromCid,msgId:msgId,time:Date.now()});
-        this._save();
+        this._save(callback);
         this._fire("receiveGroupMessage",groupId);
     },
     sendGroupImage:function (gid,data,msgId,callback) {

@@ -53,8 +53,9 @@ var WSChannel={
                     }
                     else{
                         // WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true,action:action,id:msg.id,targetUid:msg.uid,targetCid:msg.cid}));
-                        WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true}));
-                        WSChannel[action+"Handler"](msg);
+                        WSChannel[action+"Handler"](msg,()=>{
+                            WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true}));
+                        });
                     }
 
                 };
@@ -180,15 +181,17 @@ var WSChannel={
         var req = WSChannel.newRequestMsg("applyMakeFriends",{name:Store.getCurrentName(),publicKey:Store.getPublicKey()},callback,targetId);
         this._sendRequest(req,timeoutCallback);
     },
-    applyMakeFriendsHandler:function(msg){
+    applyMakeFriendsHandler:function(msg,callback){
         Store.receiveMKFriends(msg.uid,msg.data.name,msg.data.publicKey);
+        callback();
     },
     acceptMakeFriends:function (targetId,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("acceptMakeFriends",{name:Store.getCurrentName(),publicKey:Store.getPublicKey()},callback,targetId);
         this._sendRequest(req,timeoutCallback);
     },
-    acceptMakeFriendsHandler:function(msg){
+    acceptMakeFriendsHandler:function(msg,callback){
         Store.addFriend(msg.uid,msg.data.name,msg.data.publicKey);
+        callback();
     },
     acceptMakeFriendsFromOtherDevice:function(msg){
         Store.addFriend(msg.data.targetUid,msg.data.name,msg.data.publicKey);
@@ -221,11 +224,11 @@ var WSChannel={
             Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
         });
     },
-    sendMessageHandler:function(msg){
-        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text));
+    sendMessageHandler:function(msg,callback){
+        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text),callback);
     },
-    resendMessageHandler:function(msg){
-        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text));
+    resendMessageHandler:function(msg,callback){
+        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text),callback);
     },
     sendImage:function (targetId,data,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendImage",{data:data},(data,msgId)=>{
@@ -248,18 +251,19 @@ var WSChannel={
             Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
         });
     },
-    sendImageHandler:function(msg){
-        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data);
+    sendImageHandler:function(msg,callback){
+        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data,callback);
     },
-    resendImageHandler:function(msg){
-        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data);
+    resendImageHandler:function(msg,callback){
+        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data,callback);
     },
     addGroup:function (groupId,groupName,members,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("addGroup",{groupId:groupId,groupName:groupName,members:members},callback);
         this._sendRequest(req,timeoutCallback);
     },
-    addGroupHandler:function(msg){
+    addGroupHandler:function(msg,callback){
         Store.addGroup(msg.data.groupId,msg.data.groupName,msg.data.members);
+        callback();
     },
     addGroupFromOtherDevice:function(msg){
         Store.addGroup(msg.data.groupId,msg.data.groupName,msg.data.members);
@@ -285,11 +289,11 @@ var WSChannel={
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
         });
     },
-    sendGroupMessageHandler:function(msg){
-        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text));
+    sendGroupMessageHandler:function(msg,callback){
+        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text),callback);
     },
-    resendGroupMessageHandler:function(msg){
-        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text));
+    resendGroupMessageHandler:function(msg,callback){
+        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text),callback);
     },
     sendGroupImage:function (groupId,data,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendGroupImage",{groupId:groupId,data:data},(data,msgId)=>{
@@ -312,11 +316,11 @@ var WSChannel={
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
         });
     },
-    sendGroupImageHandler:function(msg){
-        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data);
+    sendGroupImageHandler:function(msg,callback){
+        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
     },
-    resendGroupImageHandler:function(msg){
-        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data);
+    resendGroupImageHandler:function(msg,callback){
+        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
     },
 
     _sendRequest:function (req,timeoutCallback,ip) {
@@ -344,15 +348,17 @@ var WSChannel={
         var req = WSChannel.newRequestMsg("msgReadStateReport",{readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},null,targetUid,targetCid);
         WSChannel._sendRequest(req);
     },
-    msgReadStateReportHandler:function (msg) {
+    msgReadStateReportHandler:function (msg,callback) {
         Store.updateMessageState(msg.uid,msg.data.readMsgs,msg.data.state);
+        callback();
     },
     groupMsgReadStateReport:function (gid,readMsgs,targetUid,targetCid) {
         var req = WSChannel.newRequestMsg("groupMsgReadStateReport",{gid:gid,readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},null,targetUid,targetCid);
         WSChannel._sendRequest(req);
     },
-    groupMsgReadStateReportHandler:function (msg) {
+    groupMsgReadStateReportHandler:function (msg,callback) {
         Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state,msg.uid);
+        callback();
     }
 };
 Store.on("readChatRecords",function (data) {
