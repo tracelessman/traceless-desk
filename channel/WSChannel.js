@@ -95,6 +95,13 @@ var WSChannel={
                 callback(this.ws);
         }
     },
+    reset :function () {
+        delete this.ip;
+        if(this.ws){
+            this.ws.close();
+            delete this.ws;
+        }
+    },
     register:function (ip,uid,name,publicKey,checkCode,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("register",{uid:uid,name:name,publicKey:publicKey,checkCode:checkCode},callback)
         this._sendRequest(req,timeoutCallback,ip);

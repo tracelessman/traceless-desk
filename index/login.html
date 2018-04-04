@@ -49,8 +49,10 @@
 
     }
     function _reset() {
-        window.top.Store.reset();
-        window.top.document.location.reload();
+        window.top.WSChannel.reset();
+        window.top.Store.reset(function () {
+            window.top.document.location.reload();
+        });
     }
     function login() {
         if(!document.getElementById("name").value){
