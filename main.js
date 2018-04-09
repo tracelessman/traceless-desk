@@ -212,14 +212,14 @@ ipc.on("remoteVersion-request",function (event,arg) {
 
 ipc.on("upgrade-request",function (event,arg) {
     checkUpdate(function (hasNew) {
-        if(hasNew||isDev()){
+        if(hasNew){
             mainWindow.loadURL(url.format({
                 pathname: path.join(__dirname, '/index/update.html'),
                 protocol: 'file:',
                 slashes: true
             }))
 
-        }else{
+        }else if(arg.toIndexIFNot!==false){
             mainWindow.loadURL(url.format({
                 pathname: path.join(__dirname, '/index/index.html'),
                 protocol: 'file:',
