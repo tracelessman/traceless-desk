@@ -68,7 +68,7 @@
       "detail":[""]
     },{
       "version":"0.3.2",
-      "files":["recent/chatBox.html","channel/WSChannel.js","index/login.html","mine/mine.html","recent/chat.html","store/Store.js","store/LocalStore.js","main.js"],
+      "files":["recent/chatBox.html","channel/WSChannel.js","index/login.html","mine/mine.html","recent/chat.html","store/Store.js","store/LocalStore.js","main.js","main.bundle.js"],
       "detail":[""]
     }
   ]
