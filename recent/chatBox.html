@@ -20,6 +20,8 @@
 
         function paste() {
             if((event.metaKey||event.ctrlKey)&&event.keyCode==86){
+                event.preventDefault();
+
                 var text = window.top.clipboard.readText();
                 if(text){
                     var selection = window.getSelection();
@@ -45,7 +47,28 @@
                     }
                 }
                 event.preventDefault();
-            }else if((event.metaKey||event.ctrlKey)&&event.keyCode==13){
+            }else if(event.altKey&&event.keyCode==13){
+                event.preventDefault();
+
+                var selection = window.getSelection();
+                //selection.deleteFromDocument();
+                var range =  selection.getRangeAt(0);
+                var divTag = document.createElement("div");
+                divTag.appendChild(document.createElement("br"))
+                range.insertNode(divTag);
+                selection.collapseToEnd();
+//                var selection = window.getSelection();
+//                selection.deleteFromDocument();
+//                var newRange = document.createRange();
+//                var range = selection.getRangeAt(0);
+//                selection.collapseToEnd();
+//                range.startContainer.parentElement.appendChild(document.createElement("br"));
+
+//                range.insertNode(document.createElement("br"));
+
+
+            }else if(event.keyCode==13){
+                event.preventDefault();
                 var imgReg = /(<img.*?>)/ig;//img为分割
                 var srcReg = /src=[\"\'](.*)[\"\']/ig;
                 var wrapTagStartReg = /<[div|br].*?>/ig;//折行标签开始部分替换成换行符

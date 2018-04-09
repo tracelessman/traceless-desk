@@ -251,15 +251,16 @@ var Store = {
             var readNewNum = recent.newMsgNum;
             recent.newReceive=false;
             recent.newMsgNum=0;
-            this._save();
             var readNewMsgs = {};
             for(var i=recent.records.length-1;i>=recent.records.length-readNewNum;i--){
                 if(!readNewMsgs[recent.records[i].cid]){
                     readNewMsgs[recent.records[i].cid] = [];
                 }
                 readNewMsgs[recent.records[i].cid].push(recent.records[i].msgId);
+                recent.records[i].read=true;
             }
-            this._fire("readChatRecords",{uid:id,readNewMsgs:readNewMsgs})
+            this._fire("readChatRecords",{uid:id,readNewMsgs:readNewMsgs});
+            this._save();
         }
         return recent.records;
     },
@@ -276,16 +277,16 @@ var Store = {
             return recent.records;
         }
     },
-    receiveMessage:function (fromId,fromCid,msgId,text) {
+    receiveMessage:function (fromId,fromCid,msgId,text,callback) {
         var records = this._getChatRecords(fromId,true,true);
         records.push({id:fromId,cid:fromCid,text:text,msgId:msgId,time:Date.now()});
-        this._save();
+        this._save(callback);
         this._fire("receiveMessage",fromId);
     },
-    receiveImage:function (fromId,fromCid,msgId,img) {
+    receiveImage:function (fromId,fromCid,msgId,img,callback) {
         var records = this._getChatRecords(fromId,true,true);
         records.push({id:fromId,cid:fromCid,img:img,msgId:msgId,time:Date.now()});
-        this._save();
+        this._save(callback);
         this._fire("receiveMessage",fromId);
     },
     sendMessage:function (targetId,text,msgId,callback) {
@@ -385,7 +386,6 @@ var Store = {
             var readNewNum = g.newMsgNum;
             g.newReceive=false;
             g.newMsgNum=0;
-            this._save();
             var readNewMsgs = {};
             for(var i=g.records.length-1;i>=g.records.length-readNewNum;i--){
                 if(!readNewMsgs[g.records[i].id]){
@@ -395,8 +395,10 @@ var Store = {
                     readNewMsgs[g.records[i].id][g.records[i].cid] = [];
                 }
                 readNewMsgs[g.records[i].id][g.records[i].cid].push(g.records[i].msgId);
+                g.records[i].read=true;
             }
             this._fire("readGroupChatRecords",{gid:id,readNewMsgs:readNewMsgs});
+            this._save();
         }
         return g.records;
     },
@@ -417,10 +419,10 @@ var Store = {
             }
         }
     },
-    receiveGroupMessage:function (fromId,fromCid,msgId,groupId,text) {
+    receiveGroupMessage:function (fromId,fromCid,msgId,groupId,text,callback) {
         var records = this._getGroupChatRecords(groupId,true,true);
         records.push({id:fromId,text:text,cid:fromCid,msgId:msgId,time:Date.now()});
-        this._save();
+        this._save(callback);
         this._fire("receiveGroupMessage",groupId);
     },
     _getGroupChatRecords:function (gid, force, newMsg) {
@@ -453,7 +455,6 @@ var Store = {
                 if(!records[i].states){
                     records[i].states = {};
                 }
-                var newState = records[i].state;
                 if(isNaN(msgIds.length)){
                     if(records[i].msgId == msgIds){
                         records[i].state = state>records[i].state?state:records[i].state;
@@ -485,10 +486,10 @@ var Store = {
             }
         }
     },
-    receiveGroupImage:function (fromId,fromCid,msgId,groupId,img) {
+    receiveGroupImage:function (fromId,fromCid,msgId,groupId,img,callback) {
         var records = this._getGroupChatRecords(groupId,true,true);
         records.push({id:fromId,img:img,cid:fromCid,msgId:msgId,time:Date.now()});
-        this._save();
+        this._save(callback);
         this._fire("receiveGroupMessage",groupId);
     },
     sendGroupImage:function (gid,data,msgId,callback) {

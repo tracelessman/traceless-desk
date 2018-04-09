@@ -197,6 +197,11 @@
                 html += "<div style=\"border:1px solid #d0d0d0;border-radius: 2px;overflow: hidden;padding: 10px;background-color: #f0f0f0\">";
                 html += _getMessage(records[i]);
                 html += "</div>";
+                if(records[i].read){
+                    html+="<i class=\"material-icons\" style='font-size: 14px;line-height: 40px;color: #a0a0a0'>";
+                    html+=getIconNameByState(4);
+                    html+="</i>";
+                }
                 html += "</div>";
             }else{
                 html+="<div style=\"display: flex;flex-direction: row;justify-content: flex-end;align-items: flex-start;width: 100%;margin-top: 10px;margin-bottom: 10px\">";
@@ -299,11 +304,12 @@
 
     function onWindowFocus() {
         if((isGroupChat&&window.top.Store.getGroup(otherId).newReceive)||(!isGroupChat&&window.top.Store.getRecent(otherId).newReceive)){
-            if(isGroupChat){
-                records = window.top.Store.readGroupChatRecords(otherId);
-            }else{
-                records = window.top.Store.readAllChatRecords(otherId);
-            }
+            refreshRecordList();
+//            if(isGroupChat){
+//                records = window.top.Store.readGroupChatRecords(otherId);
+//            }else{
+//                records = window.top.Store.readAllChatRecords(otherId);
+//            }
         }
     }
 
