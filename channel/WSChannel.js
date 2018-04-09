@@ -168,6 +168,7 @@ var WSChannel={
                 Store.foreSave();
 
                 callback(msg);
+                WSChannel.checkTimeoutMsg();
 
             });
         this._sendRequest(req,timeoutCallback,ip);
@@ -345,20 +346,41 @@ var WSChannel={
         this._timeoutHandler(req.id,timeoutCallback);
     },
     msgReadStateReport:function (readMsgs,targetUid,targetCid) {
-        var req = WSChannel.newRequestMsg("msgReadStateReport",{readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},null,targetUid,targetCid);
-        WSChannel._sendRequest(req);
+        var req = WSChannel.newRequestMsg("msgReadStateReport",{readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},function (data,msgId) {
+            Store.removeFromMQ(msgId);
+        },targetUid,targetCid);
+        Store.push2MQ(req,function () {
+            WSChannel._sendRequest(req);
+        });
     },
     msgReadStateReportHandler:function (msg,callback) {
         Store.updateMessageState(msg.uid,msg.data.readMsgs,msg.data.state);
         callback();
     },
     groupMsgReadStateReport:function (gid,readMsgs,targetUid,targetCid) {
-        var req = WSChannel.newRequestMsg("groupMsgReadStateReport",{gid:gid,readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},null,targetUid,targetCid);
-        WSChannel._sendRequest(req);
+        var req = WSChannel.newRequestMsg("groupMsgReadStateReport",{gid:gid,readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},function (data,msgId) {
+            Store.removeFromMQ(msgId);
+        },targetUid,targetCid);
+        Store.push2MQ(req,function () {
+            WSChannel._sendRequest(req);
+        });
     },
     groupMsgReadStateReportHandler:function (msg,callback) {
         Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state,msg.uid);
         callback();
+    },
+    checkTimeoutMsg:function() {
+        Store.eachTimeoutMsg(function (row) {
+            if(row&&Store.getLoginState()&&WSChannel.ws){
+                WSChannel.callbacks[row.id] = function (data,msgId) {
+                    Store.removeFromMQ(msgId);
+                };
+                WSChannel._sendRequest(JSON.parse(row.req));
+                Store.updateLastSendTime(row.id,Date.now())
+            }
+        },function (len) {
+            setTimeout(WSChannel.checkTimeoutMsg,3*60*1000);
+        })
     }
 };
 Store.on("readChatRecords",function (data) {
@@ -377,7 +399,7 @@ Store.on("readGroupChatRecords",function (data) {
             WSChannel.groupMsgReadStateReport(gid,readNewMsgs[uid][cid],uid,cid)
         }
     }
-})
+});
 function ping() {
     if(WSChannel.ip){
         var deprecated = false;

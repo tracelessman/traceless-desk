@@ -14,6 +14,13 @@ db.serialize(function () {
 
         }
     });
+    db.run("create table if not exists mq(id INTEGER PRIMARY KEY NOT NULL,req TEXT NOT NULL,lastSendTime INTEGER)", [], function (err) {
+        if (err) {
+            console.info(err);
+        } else {
+
+        }
+    });
 });
 var exists = false;
 function _update(data,callback) {
@@ -76,4 +83,30 @@ Store.registerFromOther=function (data) {
     data.clientId = UUID();
     this.data.splice(0,1,data);
     this._save();
+};
+Store.push2MQ=function (req,callback) {
+    db.run("insert into mq(id,req,lastSendTime) values(?,?,?)",[req.id,JSON.stringify(req),Date.now()],function (err) {
+        if(err){
+            console.info(err);
+        }else{
+            if(callback)
+                callback();
+        }
+    });
+};
+Store.removeFromMQ=function (reqId) {
+    db.run("delete from mq where id=?",[reqId],function (err) {
+        if(err){
+            console.info(err);
+        }else{
+
+        }
+    });
+};
+Store.eachTimeoutMsg=function (callback,complete) {
+    var n = Date.now();
+    db.each("select * from mq where lastSendTime is not null and "+n+"-lastSendTime>180000 order by id",[],callback,complete);
+};
+Store.updateLastSendTime=function (id,time,callback) {
+    db.run("update mq set lastSendTime=? where id=?",[time,id],callback);
 };
