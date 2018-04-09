@@ -1,5 +1,5 @@
 {
-  "version":"0.3.1",
+  "version":"0.3.2",
   "changeList":[
     {
       "version":"0.1.1",
@@ -65,6 +65,10 @@
       "version":"0.3.1",
       "files":["store/Store.js","store/LocalStore.js","channel/WSChannel.js","channel/LocalWSChannel.js",
         "index/index.html","index/login.html","mine/mine.html","recent/chat.html","main.bundle.js","index/index.bundle.js"],
+      "detail":[""]
+    },{
+      "version":"0.3.2",
+      "files":["recent/chatBox.html","channel/WSChannel.js","index/login.html","mine/mine.html","recent/chat.html","store/Store.js","store/LocalStore.js","main.js"],
       "detail":[""]
     }
   ]
