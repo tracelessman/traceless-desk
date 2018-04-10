@@ -83,8 +83,19 @@
             }
            return text.replace("\r\n","<div></div>");
         }else if(rec.img){
-            if(rec.img.uri){
-                return "<img src='"+rec.img.uri+"'/>";
+            if(rec.img.data){
+                var w=200;
+                var h=200;
+                var n = 1;
+                if(rec.img.width>rec.img.height){
+                   n = Math.ceil(rec.img.width/200);
+                }else{
+                    n = Math.ceil(rec.img.height/200);
+                }
+                w = rec.img.width/n;
+                h = rec.img.height/n;
+
+                return "<img src='"+rec.img.data+"' n='"+n+"' width='"+w+"' height='"+h+"'/>";
             }else{
                 return "<img src='"+rec.img+"'/>";
             }
@@ -255,14 +266,15 @@
             });
         }
     }
-    function sendImg(data) {
+    function sendImg(data,width,height) {
+        var d = {data:data,width:width,height:height};
         if(isGroupChat){
-            window.top.WSChannel.sendGroupImage(otherId,data,()=>{
+            window.top.WSChannel.sendGroupImage(otherId,d,()=>{
 //                window.top.Store.sendGroupImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
         }else{
-            window.top.WSChannel.sendImage(otherId,data,()=>{
+            window.top.WSChannel.sendImage(otherId,d,()=>{
 //                window.top.Store.sendImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
@@ -270,24 +282,28 @@
     }
 
     function showBiggerImage() {
-        var widthReg = /width=\"(\d+)\"/ig;
-        var heightReg = /height=\"(\d+)\"/ig;
+        var widthReg = /width=[\"\'](\d+(\.\d+)?)[\"\']/ig;
+        var heightReg = /height=[\"\'](\d+(\.\d+)?)[\"\']/ig;
         if(event.target.tagName=="IMG"){
             //alert(event.target.parentNode.innerHTML);
             var w = event.target.naturalWidth;
             var h = event.target.naturalHeight;
             var imgHtml = event.target.outerHTML;
+            var n;
+            if(event.target.getAttribute("n")){
+                n = parseInt(event.target.getAttribute("n"));
+            }
 
             var r = imgHtml.match(widthReg);
             if(r){
-                w = RegExp.$1;
+                w = parseFloat(RegExp.$1)*n;
             }
             var r = imgHtml.match(heightReg);
             if(r){
-                h = RegExp.$1;
+                h = parseFloat(RegExp.$1)*n;
             }
            // window.open("showImage.html","_blank","height=100, width=400, toolbar =no, menubar=no, scrollbars=no, resizable=no, location=no, status=no");
-            window.top.ipc.send("openImageBrowser",{width:parseInt(w),height:parseInt(h),html:event.target.outerHTML});
+            window.top.ipc.send("openImageBrowser",{width:parseInt(w),height:parseInt(h),html:event.target.outerHTML.replace(widthReg,"width=\""+w+"\"").replace(heightReg,"height=\""+h+"\"")});
         }
     }
 
