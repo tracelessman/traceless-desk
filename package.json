@@ -17,7 +17,6 @@
     "webpack": "^4.0.1"
   },
   "dependencies": {
-    "electron-context-menu": "^0.9.1",
     "qr-image": "^3.2.0",
     "react-native-rsa": "0.0.3",
     "sqlite3": "^3.1.13",

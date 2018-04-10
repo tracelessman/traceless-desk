@@ -21,17 +21,21 @@
         function paste() {
             if((event.metaKey||event.ctrlKey)&&event.keyCode==90){//undo
                 document.execCommand("undo");
+            }else if ((event.metaKey || event.ctrlKey) && event.keyCode == 67) {//copy
+                event.preventDefault();
+                document.execCommand("copy");
             }
             else if((event.metaKey||event.ctrlKey)&&event.keyCode==86){//paste
-                //event.preventDefault();
-//                var text = window.top.clipboard.readText();
-//                if(text){
+                event.preventDefault();
+                var text = window.top.clipboard.readText();
+                if(text){
 //                    var selection = window.getSelection();
 //                    selection.deleteFromDocument();
 //                    var range =  selection.getRangeAt(0);
 //                    range.insertNode(document.createTextNode(text));
 //                    selection.collapseToEnd();
-//                }else{
+                    document.execCommand("paste");
+                }else{
                     var img = window.top.clipboard.readImage();
                     if(!img.isEmpty()){
                         var html = `<img width=\"${img.getSize().width/2}\" height=\"${img.getSize().height/2}\" src=\"${img.toDataURL()}\">`;
@@ -49,7 +53,7 @@
 //                        range.insertNode(imgTag);
 //                        selection.collapseToEnd();
                     }
-//                }
+                }
             }else if(event.altKey&&event.keyCode==13){
                 event.preventDefault();
 

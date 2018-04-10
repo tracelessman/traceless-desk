@@ -18,9 +18,7 @@ function isDev(){
     const isEnvSet = 'ELECTRON_IS_DEV' in process.env;
     return isEnvSet ? getFromEnv : (process.defaultApp || /node_modules[\\/]electron[\\/]/.test(process.execPath));
 }
-require('electron-context-menu')({
-    shouldShowMenu: (event, params) => false
-});
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
