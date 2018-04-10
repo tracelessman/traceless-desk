@@ -6,4 +6,4 @@ window.os = require("os");
 window.ws = require("ws");
 window.path = require("path");
 window.RSAKey = require('react-native-rsa');
-
+window.UUID = require('uuid/v4');
