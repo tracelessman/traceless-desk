@@ -71,6 +71,8 @@
                 event.preventDefault();
                 var imgReg = /(<img.*?>)/ig;//img为分割
                 var srcReg = /src=[\"\'](.*)[\"\']/ig;
+                var widthReg = /width=[\"\'](.*)[\"\']/ig;
+                var heightReg = /height=[\"\'](.*)[\"\']/ig;
                 var wrapTagStartReg = /<[div|br].*?>/ig;//折行标签开始部分替换成换行符
                 //匹配非折行标签
                 var notWrapTagReg = /<(?![div|br]).*?>/ig;
@@ -80,9 +82,20 @@
                 ss.forEach(function (p) {
                     //alert(p);
                     if(p.startsWith("<img")){
-                        var sr = p.match(srcReg);
-                        if(sr){
-                            window.parent.sendImg(RegExp.$1);
+                        var srcStr = p.match(srcReg);
+                        if(srcStr){
+                            var data = RegExp.$1;
+                        }
+                        var widthStr = p.match(widthReg);
+                        if(widthStr){
+                            var width = parseInt(RegExp.$1);
+                        }
+                        var heightStr = p.match(heightReg);
+                        if(heightStr){
+                            var height = parseInt(RegExp.$1);
+                        }
+                        if(data){
+                            window.parent.sendImg(data,width,height);
                         }
                     }else{
                         var s = p.replace(notWrapTagReg,"").replace(wrapTagStartReg,"\r\n").trim();
