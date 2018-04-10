@@ -1,9 +1,9 @@
 {
   "name": "traceless",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "main": "./main.bundle.js",
   "scripts": {
-    "start": "electron ./main.js",
+    "start": "electron ./main.bundle.js",
     "build": "node build.js",
     "publish": "node build.js && electron .",
     "asars": "asar pack node_modules/sqlite3 asars/sqlite3.asar"
