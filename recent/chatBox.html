@@ -34,7 +34,7 @@
 //                }else{
                     var img = window.top.clipboard.readImage();
                     if(!img.isEmpty()){
-                        var html = `<img width=\"${img.getSize().width/2}\" height=\"${img.getSize().height/2}\" src=\" ${img.toDataURL()}\">`;
+                        var html = `<img width=\"${img.getSize().width/2}\" height=\"${img.getSize().height/2}\" src=\"${img.toDataURL()}\">`;
                         document.execCommand("insertHTML",false,html);
 
                         //var t = document.execCommand("insertImage",false,img.toDataURL());
