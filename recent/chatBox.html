@@ -34,7 +34,7 @@
 //                    var range =  selection.getRangeAt(0);
 //                    range.insertNode(document.createTextNode(text));
 //                    selection.collapseToEnd();
-                    document.execCommand("paste");
+                    document.execCommand("insertText",false,text);
                 }else{
                     var img = window.top.clipboard.readImage();
                     if(!img.isEmpty()){
