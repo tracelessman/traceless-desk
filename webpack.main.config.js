@@ -17,7 +17,6 @@ let mainConfig = {
         main: path.join(__dirname, './main.js')
     },
     externals: [
-        ...Object.keys(dependencies || {})
     ],
     module: {
         rules: [
