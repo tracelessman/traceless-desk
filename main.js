@@ -12,15 +12,16 @@ const nativeImage = require('electron').nativeImage;
 const net = electron.net
 const dialog = electron.dialog
 var originalFs = require('original-fs');
+// var menu = require('electron-context-menu');
 
 function isDev(){
     const getFromEnv = parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
     const isEnvSet = 'ELECTRON_IS_DEV' in process.env;
     return isEnvSet ? getFromEnv : (process.defaultApp || /node_modules[\\/]electron[\\/]/.test(process.execPath));
 }
-require('electron-context-menu')({
-    shouldShowMenu: (event, params) => false
-});
+// menu({
+//     shouldShowMenu: (event, params) => false
+// });
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
