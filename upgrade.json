@@ -1,5 +1,5 @@
 {
-  "version":"0.3.2",
+  "version":"0.3.3",
   "changeList":[
     {
       "version":"0.1.1",
@@ -69,6 +69,10 @@
     },{
       "version":"0.3.2",
       "files":["recent/chatBox.html","channel/WSChannel.js","index/login.html","mine/mine.html","recent/chat.html","store/Store.js","store/LocalStore.js","main.js","main.bundle.js"],
+      "detail":[""]
+    },{
+      "version":"0.3.3",
+      "files":["recent/chatBox.html","recent/chat.html","main.js","main.bundle.js"],
       "detail":[""]
     }
   ]
