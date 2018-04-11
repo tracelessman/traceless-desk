@@ -1,5 +1,5 @@
 {
-  "version":"0.3.6",
+  "version":"0.3.7",
   "changeList":[
     {
       "version":"0.1.1",
@@ -85,6 +85,13 @@
     },{
       "version":"0.3.6",
       "files":["recent/chatBox.html"],
+      "detail":[""]
+    },{
+      "version":"0.3.7",
+      "files":["contact/addFriend.html","contact/contact.html","contact/detail.html","contact/request.html",
+        "index/index.html","mine/mine.html",
+        "recent/addGroup.html","recent/chat.html","recent/chatBox.html","recent/default.html","recent/recent.html",
+      "images/chat-w-r.png","images/chat-y-l.png"],
       "detail":[""]
     }
   ]
