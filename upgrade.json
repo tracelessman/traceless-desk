@@ -1,5 +1,5 @@
 {
-  "version":"0.3.8",
+  "version":"0.3.9",
   "changeList":[
     {
       "version":"0.1.1",
@@ -96,6 +96,10 @@
     },{
       "version":"0.3.8",
       "files":["recent/chat.html","recent/chatBox.html","images/bottom-arrow.png","recent/faces.js"],
+      "detail":[""]
+    },{
+      "version":"0.3.9",
+      "files":["channel/WSChannel.js","recent/chat.html","store/Store.js","recent/showCapture.html","main.bundle.js","index/index.bundle.js"],
       "detail":[""]
     }
   ]
