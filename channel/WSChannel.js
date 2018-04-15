@@ -120,7 +120,7 @@ var WSChannel={
     },
     login:function (name,uid,cid,ip,callback,timeoutCallback) {
         Store.setCurrentUid(uid) ;
-        // window.top.ipc.send("upgrade-request",{toIndexIFNot:false});
+        window.top.ipc.send("upgrade-request",{toIndexIFNot:false});
         var req = WSChannel.newRequestMsg("login",{name:name,uid:uid,cid:cid},
             function (msg) {
                 if(!msg.err){
