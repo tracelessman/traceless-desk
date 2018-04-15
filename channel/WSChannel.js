@@ -120,7 +120,7 @@ var WSChannel={
     },
     login:function (name,uid,cid,ip,callback,timeoutCallback) {
         Store.setCurrentUid(uid) ;
-        window.top.ipc.send("upgrade-request",{toIndexIFNot:false});
+        // window.top.ipc.send("upgrade-request",{toIndexIFNot:false});
         var req = WSChannel.newRequestMsg("login",{name:name,uid:uid,cid:cid},
             function (msg) {
                 if(!msg.err){
@@ -382,7 +382,61 @@ var WSChannel={
         },function (len) {
             setTimeout(WSChannel.checkTimeoutMsg,3*60*1000);
         })
-    }
+    },
+    sendFile:function (targetId,data,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("sendFile",data,(data,msgId)=>{
+            Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        },targetId);
+        Store.sendFile(targetId,data,req.id,()=>{
+            if(callback)
+                callback();
+            this._sendRequest(req,()=>{
+                Store.updateMessageState(targetId,req.id,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+            });
+        });
+    },
+    resendFile:function (msgId,targetId,data) {
+        Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SENDING);
+        var req = WSChannel.newRequestMsg("resendFile",data,(data)=>{
+            Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        },targetId,null,msgId);
+        this._sendRequest(req,()=>{
+            Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+        });
+    },
+    sendFileHandler:function(msg,callback){
+        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data,callback);
+    },
+    resendFileHandler:function(msg,callback){
+        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data,callback);
+    },
+    sendGroupFile:function (groupId,data,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("sendGroupFile",{groupId:groupId,data:data},(data,msgId)=>{
+            Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        });
+        Store.sendGroupFile(groupId,data,req.id,()=>{
+            if(callback)
+                callback();
+            this._sendRequest(req,()=>{
+                Store.updateGroupMessageState(groupId,req.id,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+            });
+        });
+    },
+    resendGroupFile:function (msgId,groupId,data) {
+        Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SENDING);
+        var req = WSChannel.newRequestMsg("resendGroupFile",{groupId:groupId,data:data},(data)=>{
+            Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
+        },null,null,msgId);
+        this._sendRequest(req,()=>{
+            Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_NOT_RECEIVE);
+        });
+    },
+    sendGroupFileHandler:function(msg,callback){
+        Store.receiveGroupFile(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
+    },
+    resendGroupFileHandler:function(msg,callback){
+        Store.receiveGroupFile(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
+    },
 };
 Store.on("readChatRecords",function (data) {
     var uid = data.uid;
