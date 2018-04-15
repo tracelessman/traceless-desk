@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    </style>
+    <script src="../index/index.bundle.js"></script>
+
+</head>
+<body>
+
+</body>
+<script>
+//    const size = electronScreen.getPrimaryDisplay().workAreaSize
+    var size = {width:window.screen.width,height:window.screen.height};
+    let options = { types: ['screen'], thumbnailSize: size }
+
+    desktopCapturer.getSources(options, function (error, sources) {
+        if (error) return console.log(error)
+
+        sources.forEach(function (source) {
+            //(source.thumbnail.toDataURL());
+            if (source.name === 'Entire screen' || source.name === 'Screen 1') {
+                document.body.innerHTML="<img src='"+source.thumbnail.toDataURL()+"'>";
+                ipc.send("showCaptureBrowser",size);
+            }
+        })
+    })
+</script>
+</html>

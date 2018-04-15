@@ -289,6 +289,12 @@ var Store = {
         this._save(callback);
         this._fire("receiveMessage",fromId);
     },
+    receiveFile:function (fromId,fromCid,msgId,file,callback) {
+        var records = this._getChatRecords(fromId,true,true);
+        records.push({id:fromId,cid:fromCid,file:file,msgId:msgId,time:Date.now()});
+        this._save(callback);
+        this._fire("receiveMessage",fromId);
+    },
     sendMessage:function (targetId,text,msgId,callback) {
         var records = this._getChatRecords(targetId,true);
         records.push({msgId:msgId,text:text,state:Store.MESSAGE_STATE_SENDING,time:Date.now()});
@@ -323,13 +329,20 @@ var Store = {
         }
     },
 
-    getRecentChatRecord:function (targetId,msgId) {
+    getRecentChatRecord:function (targetId,msgId,uid) {
         var records = this._getChatRecords(targetId,false);
         if(records){
             for(var i=0;i<records.length;i++){
-                if(records[i].msgId == msgId){
-                    return records[i];
+                if(uid){
+                    if(records[i].id==uid&&records[i].msgId == msgId){
+                        return records[i];
+                    }
+                }else{
+                    if((!records[i].id)&&records[i].msgId == msgId){
+                        return records[i];
+                    }
                 }
+
 
             }
         }
@@ -338,6 +351,15 @@ var Store = {
     sendImage:function (targetId,data,msgId,callback) {
         var records = this._getChatRecords(targetId,true);
         records.push({msgId:msgId,img:data,state:Store.MESSAGE_STATE_SENDING,time:Date.now()});
+        this._save(()=> {
+            if(callback)
+                callback();
+            this._fire("sendMessage",targetId);
+        })
+    },
+    sendFile:function (targetId,data,msgId,callback) {
+        var records = this._getChatRecords(targetId,true);
+        records.push({msgId:msgId,file:data,state:Store.MESSAGE_STATE_SENDING,time:Date.now()});
         this._save(()=> {
             if(callback)
                 callback();
@@ -476,13 +498,20 @@ var Store = {
             }
         }
     },
-    getGroupChatRecord:function (gid,msgId) {
+    getGroupChatRecord:function (gid,msgId,uid) {
         var records = this._getGroupChatRecords(gid,false);
         if(records){
             for(var i=0;i<records.length;i++){
-                if((!records[i].id)&&records[i].msgId == msgId){
-                    return records[i];
+                if(!uid){
+                    if((!records[i].id)&&records[i].msgId == msgId){
+                        return records[i];
+                    }
+                }else{
+                    if((records[i].id==uid)&&records[i].msgId == msgId){
+                        return records[i];
+                    }
                 }
+
             }
         }
     },
@@ -492,9 +521,24 @@ var Store = {
         this._save(callback);
         this._fire("receiveGroupMessage",groupId);
     },
+    receiveGroupFile:function (fromId,fromCid,msgId,groupId,file,callback) {
+        var records = this._getGroupChatRecords(groupId,true,true);
+        records.push({id:fromId,file:file,cid:fromCid,msgId:msgId,time:Date.now()});
+        this._save(callback);
+        this._fire("receiveGroupMessage",groupId);
+    },
     sendGroupImage:function (gid,data,msgId,callback) {
         var records = this._getGroupChatRecords(gid,true);
         records.push({img:data,msgId:msgId,state:Store.MESSAGE_STATE_SENDING,time:Date.now()});
+        this._save(()=> {
+            if(callback)
+                callback();
+            this._fire("sendGroupMessage",gid);
+        })
+    },
+    sendGroupFile:function (gid,data,msgId,callback) {
+        var records = this._getGroupChatRecords(gid,true);
+        records.push({file:data,msgId:msgId,state:Store.MESSAGE_STATE_SENDING,time:Date.now()});
         this._save(()=> {
             if(callback)
                 callback();

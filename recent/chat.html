@@ -93,6 +93,8 @@
             }
             document.getElementById("face-content").innerHTML=html;
         }
+
+
     </script>
 </head>
 <body onkeydown="copy()">
@@ -114,11 +116,19 @@
                     <div style="background-image: url(../images/bottom-arrow.png);width:27px;height:12px"></div>
                 </div>
             </div>
-            <div style="width:100%;height:30px;border-top: 1px solid #d0d0d0;line-height: 30px;padding-left: 10px">
-                <div style="font-size: 20px;cursor: pointer" onclick="showFaceBox()">😀</div>
+            <div style="width:100%;height:24px;border-top: 1px solid #d0d0d0;padding-left: 10px;line-height: 24px">
+                <i class="material-icons" style="color: #a0a0a0;font-size: 24px;cursor: pointer;margin-right: 5px;" onclick="showFaceBox()">
+                    tag_faces
+                </i>
+                <i class="material-icons" style="color: #a0a0a0;font-size: 24px;cursor: pointer;margin-right: 5px;" onclick="openFileDialog()">
+                    folder
+                </i>
+                <!--<i class="material-icons" style="color: #a0a0a0;font-size: 22px;cursor: pointer;transform:rotate(270deg);" onclick="captureDesktop()">-->
+                    <!--content_cut-->
+                <!--</i>-->
             </div>
 
-            <div style="width: 100%;height:150px;border-top: 1px dotted #e0e0e0;display: flex">
+            <div style="width: 100%;height:150px;display: flex">
 
                 <iframe id="chatBox" style="flex:1" src="chatBox.html" frameborder="0"></iframe>
             </div>
@@ -160,6 +170,8 @@
             }else{
                 return "<img src='"+rec.img+"'/>";
             }
+        }else if(rec.file){
+            return '<div onclick=showFile(\"'+(rec.id?rec.id:"")+'\",\"'+rec.msgId+'\")><i class="material-icons" style="color: #b0b0b0;font-size: 40px;cursor: pointer;">insert_drive_file</i><span>'+rec.file.name+'</span></div>';
         }
     }
     var ps = document.location.href.substring(document.location.href.indexOf("?")+1);
@@ -267,7 +279,7 @@
                 html += isGroupChat?window.top.Store.getMember(otherId,records[i].id).name:window.top.Store.getFriend(otherId).name;
                 html += "</div></div>";
                 html += "<div style='width:11px;height:18px;background-image: url(../images/chat-y-l.png);margin-top: 11px'></div>";
-                html += "<div style=\"max-width:200px;min-height:40px;border-radius: 5px;overflow: hidden;padding: 12px 10px;background-color: #f9e160\">";
+                html += "<div style=\"max-width:250px;min-height:40px;border-radius: 5px;overflow: hidden;padding: 12px 10px;background-color: #f9e160\">";
                 html += _getMessage(records[i]);
                 html += "</div>";
 //                if(records[i].read){
@@ -281,7 +293,7 @@
                 html+="<i id='msgState' onclick=\"onMsgStateTouch('"+records[i].msgId+"')\"  class=\"material-icons\" style='font-size: 16px;line-height: 40px;color:#737373;margin-right: 5px;"+((isGroupChat||records[i].state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE)?"cursor: pointer":"")+"'>";
                 html+=getIconNameByState(records[i].state);
                 html+="</i>";
-                html += "<div style=\"max-width:200px;min-height:40px;border-radius: 5px;overflow: hidden;padding: 12px 10px;background-color: #ffffff\">";
+                html += "<div style=\"max-width:250px;min-height:40px;border-radius: 5px;overflow: hidden;padding: 12px 10px;background-color: #ffffff\">";
 
                 html += _getMessage(records[i]);
                 html+="</div>";
@@ -400,6 +412,7 @@
     window.top.Store.on("receiveGroupMessage",onReceiveMessage);
     window.top.Store.on("sendGroupMessage",onSendMessage);
     window.top.ipc.on("mainWindow-focus",onWindowFocus);
+    window.top.ipc.on("openFileDialog-response",sendFile);
 
     window.addEventListener("beforeunload", function (event) {
         window.top.Store.un("receiveMessage",onReceiveMessage);
@@ -409,6 +422,40 @@
         window.top.Store.un("receiveGroupMessage",onReceiveMessage);
         window.top.Store.un("sendGroupMessage",onSendMessage);
         window.top.ipc.removeListener("mainWindow-focus",onWindowFocus);
+        window.top.ipc.removeListener("openFileDialog-response",sendFile);
     });
+
+    function openFileDialog() {
+        window.top.ipc.send("openFileDialog");
+    }
+    function sendFile (event,arg) {
+        if(isGroupChat){
+            window.top.WSChannel.sendGroupFile(otherId,arg,()=>{
+            });
+        }else{
+            window.top.WSChannel.sendFile(otherId,arg,()=>{
+            });
+        }
+    }
+    function showFile(uid,msgId){
+        if(isGroupChat){
+            var rec = window.top.Store.getGroupChatRecord(otherId,msgId,uid);
+        }else{
+            var rec = window.top.Store.getRecentChatRecord(otherId,msgId,uid);
+        }
+        var filePath = window.top.path.join(window.top.os.tmpdir(),rec.file.name);
+        window.top.fs.writeFile(filePath,window.top.Buffer.from(rec.file.data),function (err) {
+            if(!err){
+                var result = window.top.shell.openItem(filePath);
+                if(!result){
+                    window.top.shell.showItemInFolder(filePath);
+                }
+            }
+        });
+    }
+    function captureDesktop() {
+        window.top.ipc.send("openCaptureBrowser");
+    }
+
 </script>
 </html>

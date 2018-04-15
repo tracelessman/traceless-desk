@@ -93,6 +93,20 @@ app.on('activate', function () {
     }
 })
 
+ipc.on("openFileDialog",function (event,arg) {
+    var result = dialog.showOpenDialog({properties: ['openFile']});
+    if(result&&result.length>0){
+        fs.readFile(result[0],function (err,buf) {
+            if(buf){
+               var data = buf.toJSON().data;
+               var tmp = result[0].split(/[\\|\/]/ig);
+
+                event.sender.send('openFileDialog-response', {data:data,name:tmp[tmp.length-1]});
+            }
+        })
+    }
+});
+
 let imageBrowser;
 ipc.on('openImageBrowser', function (event, arg) {
     global.imageHtml = arg.html;
@@ -117,7 +131,38 @@ ipc.on('openImageBrowser', function (event, arg) {
     imageBrowser.show();
 })
 
+let captureBrowser;
+ipc.on('openCaptureBrowser', function (event, arg) {
+    if(!captureBrowser){
+        captureBrowser = new BrowserWindow({frame:false,modal:true,show:true,transparent:true});
+        captureBrowser.on('closed', function () {
+            // Dereference the window object, usually you would store windows
+            // in an array if your app supports multi windows, this is the time
+            // when you should delete the corresponding element.
+            captureBrowser = null
+        })
+    }
+    captureBrowser.loadURL(url.format({
+        pathname: path.join(__dirname, '/recent/showCapture.html'),
+        protocol: 'file:',
+        slashes: true
+    }))
+    captureBrowser.webContents.openDevTools();
+    // captureBrowser.setSize(arg.width+100,arg.height+100);
+    // captureBrowser.
+     captureBrowser.center();
+     // captureBrowser.setAlwaysOnTop(true,"screen-saver",9);
+    // captureBrowser.show();//
+})
 
+ipc.on('showCaptureBrowser', function (event, arg) {
+    //captureBrowser.show();
+    // captureBrowser.setFullScreen(true);
+   // captureBrowser.setSimpleFullScreen(true);
+    captureBrowser.setMenu(null);
+    captureBrowser.setAutoHideMenuBar(true);
+     captureBrowser.setBounds({x:0,y:0,width:arg.width,height:arg.height});
+});
 
 if(app.dock){
     var image = nativeImage.createFromPath(path.join(__dirname, "/images/traceless.png"));
