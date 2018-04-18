@@ -12,3 +12,4 @@ window.fs = require("fs");
 window.Buffer = Buffer;
 window.desktopCapturer = require('electron').desktopCapturer;
 window.electronScreen = require('electron').screen;
+window.nativeImage = require('electron').nativeImage;

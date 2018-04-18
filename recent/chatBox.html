@@ -21,6 +21,14 @@
     </style>
     <script>
 
+        function pasteImg() {
+            document.body.focus();
+            var img = window.top.clipboard.readImage();
+            if(!img.isEmpty()){
+                var html = `<img width=\"${img.getSize().width/2}\" height=\"${img.getSize().height/2}\" src=\"${img.toDataURL()}\">`;
+                document.execCommand("insertHTML",false,html);
+            }
+        }
         function paste() {
             if((event.metaKey||event.ctrlKey)&&event.keyCode==90){//undo
                 document.execCommand("undo");
@@ -39,23 +47,7 @@
 //                    selection.collapseToEnd();
                     document.execCommand("insertText",false,text);
                 }else{
-                    var img = window.top.clipboard.readImage();
-                    if(!img.isEmpty()){
-                        var html = `<img width=\"${img.getSize().width/2}\" height=\"${img.getSize().height/2}\" src=\"${img.toDataURL()}\">`;
-                        document.execCommand("insertHTML",false,html);
-
-                        //var t = document.execCommand("insertImage",false,img.toDataURL());
-
-//                        var selection = window.getSelection();
-//                        selection.deleteFromDocument();
-//                        var range =  selection.getRangeAt(0);
-//                        var imgTag = document.createElement("img");
-//                        imgTag.width = img.getSize().width/2;
-//                        imgTag.height = img.getSize().height/2;
-//                        imgTag.src = img.toDataURL();
-//                        range.insertNode(imgTag);
-//                        selection.collapseToEnd();
-                    }
+                    pasteImg();
                 }
             }else if(event.altKey&&event.keyCode==13){
                 event.preventDefault();
@@ -117,6 +109,10 @@
                // window.parent.send();
             }
         }
+        window.top.ipc.on("capture-complete",pasteImg);
+        window.addEventListener("beforeunload", function (event) {
+            window.top.ipc.removeListener("capture-complete",pasteImg);
+        });
     </script>
 </head>
 <body contenteditable="true" onkeydown="paste()"></body></html>
