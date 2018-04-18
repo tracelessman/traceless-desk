@@ -146,7 +146,7 @@ ipc.on('openImageBrowser', function (event, arg) {
 let captureBrowser;
 function openCaptureBrowser() {
     if(!captureBrowser){
-        captureBrowser = new BrowserWindow({frame:false,modal:true,transparent:true,width:0,height:0,alwaysOnTop: true,});
+        captureBrowser = new BrowserWindow({frame:false,modal:true,transparent:true,show:false,width:0,height:0,alwaysOnTop: true,});
         captureBrowser.on('closed', function () {
             captureBrowser = null
         })
@@ -163,7 +163,9 @@ ipc.on('openCaptureBrowser', function (event, arg) {
 })
 
 ipc.on('showCaptureBrowser', function (event, arg) {
-    captureBrowser.setFullScreen(true)
+    captureBrowser.setFullScreen(true);
+    captureBrowser.show();
+
 });
 ipc.on('closeCaptureBrowser', function (event, arg) {
     if(captureBrowser){
