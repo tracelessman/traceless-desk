@@ -8,29 +8,107 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
         }
     </style>
     <script src="../index/index.bundle.js"></script>
-
+    <link href="../css/index.css" rel="stylesheet"></link>
 </head>
-<body>
+<body onkeydown="dokeydown()" ondragstart="event.preventDefault();" onmousedown="dragStart()" onmousemove="dragMove()" onmouseup="dragEnd()">
+<div style="flex:1" id="content" ondragstart="event.preventDefault();">
 
+</div>
+<div style="position: absolute;left:0px;top:0px;height:100%;background-color: #000000;opacity: 0.5;" id="mask1">
+</div>
+<div style="position: absolute;top:0px;background-color: #000000;opacity: 0.5" id="mask2">
+</div>
+<div style="position: absolute;top:0px;height:100%;background-color: #000000;opacity: 0.5" id="mask3">
+</div>
+<div style="position: absolute;bottom: 0px;background-color: #000000;opacity: 0.5" id="mask4">
+</div>
+<div style="position: absolute;border:1px solid #000000" id="mask5">
+</div>
+<div style="height:35px;display: none;position: absolute;background-color: #646464" id="tools">
+    <i class="material-icons" style="float:right;font-size: 35px;color:#f9e160" onclick="acceptCrop()">check</i>
+    <i class="material-icons" style="float:right;font-size: 35px;color:#ffffff" onclick="reset()" >clear</i>
+</div>
 </body>
 <script>
-//    const size = electronScreen.getPrimaryDisplay().workAreaSize
+//    const size2 = electronScreen.getPrimaryDisplay().workAreaSize
     var size = {width:window.screen.width,height:window.screen.height};
     let options = { types: ['screen'], thumbnailSize: size }
-
+    var sourceImage;
     desktopCapturer.getSources(options, function (error, sources) {
         if (error) return console.log(error)
 
         sources.forEach(function (source) {
             //(source.thumbnail.toDataURL());
             if (source.name === 'Entire screen' || source.name === 'Screen 1') {
-                document.body.innerHTML="<img src='"+source.thumbnail.toDataURL()+"'>";
+                document.getElementById("content").innerHTML="<img src='"+source.thumbnail.toDataURL()+"' ondragstart='event.preventDefault();'>";
                 ipc.send("showCaptureBrowser",size);
+                sourceImage = source.thumbnail;
             }
         })
     })
+
+    function dokeydown() {
+        if(event.keyCode==27){
+            ipc.send("closeCaptureBrowser");
+        }else if(event.keyCode==13){
+            acceptCrop();
+        }
+    }
+    var startPos;
+    var rec;
+    function dragStart() {
+        if(!rec)
+            startPos  = {x:event.pageX,y:event.pageY};
+    }
+    function dragMove() {
+        if(startPos){
+            var pos  = {x:event.pageX,y:event.pageY};
+            rec = {x:Math.min(pos.x,startPos.x),y:Math.min(pos.y,startPos.y),width:Math.abs(pos.x-startPos.x),height:Math.abs(pos.y-startPos.y)};
+            document.getElementById("mask5").style["width"]=rec.width+"px";
+            document.getElementById("mask5").style["height"]=rec.height+"px";
+            document.getElementById("mask5").style["left"]=rec.x+"px";
+            document.getElementById("mask5").style["top"]=rec.y+"px";
+
+            document.getElementById("mask1").style["width"]=rec.x+"px";
+            document.getElementById("mask2").style["left"]=rec.x+"px";
+            document.getElementById("mask2").style["width"]=rec.width+"px";
+            document.getElementById("mask2").style["height"]=rec.y+"px";
+            document.getElementById("mask3").style["left"]=(rec.x+rec.width)+"px";
+            document.getElementById("mask3").style["width"]=(size.width-rec.x-rec.width)+"px";
+            document.getElementById("mask4").style["left"]=rec.x+"px";
+            document.getElementById("mask4").style["width"]=rec.width+"px";
+            document.getElementById("mask4").style["height"]=(size.height-rec.height-rec.y)+"px";
+
+        }
+    }
+    function dragEnd() {
+        if(startPos&&rec){
+            document.getElementById("tools").style["right"]=(size.width-rec.x-rec.width)+"px";
+            if(rec.y+rec.height+35>size.height){
+                document.getElementById("tools").style["bottom"]="0px";
+            }else{
+                document.getElementById("tools").style["top"]=(rec.y+rec.height)+"px";
+            }
+            document.getElementById("tools").style["display"]="";
+        }
+        startPos=null;
+
+    }
+    function acceptCrop() {
+        if(rec){
+            clipboard.writeImage(sourceImage.crop(rec).resize({width:rec.width*2,height:rec.height*2}));
+            ipc.send("closeCaptureBrowser",true);
+        }
+    }
+    function reset() {
+        ipc.send("closeCaptureBrowser");
+    }
+    
 </script>
 </html>

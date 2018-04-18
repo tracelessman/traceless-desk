@@ -12,6 +12,7 @@ const nativeImage = require('electron').nativeImage;
 const net = electron.net
 const dialog = electron.dialog
 var originalFs = require('original-fs');
+const globalShortcut = electron.globalShortcut;
 
 function isDev(){
     const getFromEnv = parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
@@ -75,6 +76,17 @@ function createWindow () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
+app.on('ready', () => {
+    // 注册一个 'CommandOrControl+X' 的全局快捷键
+    const ret = globalShortcut.register('Control+Alt+A', () => {
+        if(!captureBrowser)
+            openCaptureBrowser();
+    })
+})
+
+app.on('will-quit', () => {
+    globalShortcut.unregisterAll()
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
@@ -132,13 +144,10 @@ ipc.on('openImageBrowser', function (event, arg) {
 })
 
 let captureBrowser;
-ipc.on('openCaptureBrowser', function (event, arg) {
+function openCaptureBrowser() {
     if(!captureBrowser){
-        captureBrowser = new BrowserWindow({frame:false,modal:true,show:true,transparent:true});
+        captureBrowser = new BrowserWindow({frame:false,modal:true,transparent:true,width:0,height:0,alwaysOnTop: true,});
         captureBrowser.on('closed', function () {
-            // Dereference the window object, usually you would store windows
-            // in an array if your app supports multi windows, this is the time
-            // when you should delete the corresponding element.
             captureBrowser = null
         })
     }
@@ -147,21 +156,23 @@ ipc.on('openCaptureBrowser', function (event, arg) {
         protocol: 'file:',
         slashes: true
     }))
-    captureBrowser.webContents.openDevTools();
-    // captureBrowser.setSize(arg.width+100,arg.height+100);
-    // captureBrowser.
-     captureBrowser.center();
-     // captureBrowser.setAlwaysOnTop(true,"screen-saver",9);
-    // captureBrowser.show();//
+    // captureBrowser.setFullScreen(true);
+}
+ipc.on('openCaptureBrowser', function (event, arg) {
+    openCaptureBrowser();
 })
 
 ipc.on('showCaptureBrowser', function (event, arg) {
-    //captureBrowser.show();
-    // captureBrowser.setFullScreen(true);
-   // captureBrowser.setSimpleFullScreen(true);
-    captureBrowser.setMenu(null);
-    captureBrowser.setAutoHideMenuBar(true);
-     captureBrowser.setBounds({x:0,y:0,width:arg.width,height:arg.height});
+    captureBrowser.setFullScreen(true)
+});
+ipc.on('closeCaptureBrowser', function (event, arg) {
+    if(captureBrowser){
+        captureBrowser.minimize();
+        captureBrowser.close();
+        captureBrowser=null;
+        if(arg)
+        mainWindow.webContents.send('capture-complete');
+    }
 });
 
 if(app.dock){
