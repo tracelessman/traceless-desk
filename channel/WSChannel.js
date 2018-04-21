@@ -16,7 +16,7 @@ var WSChannel={
         var id = msgId||this.generataMsgId();
         if(callback)
             this.callbacks[id] = callback;
-        return  {id:id,action:action,data:data,uid:Store.getCurrentUid(),targetUid:targetUid,cid:Store.getClientId(),targetCid:targetCid};//id消息id uid 身份id
+        return  {id:id,action:action,data:data,uid:Store.getCurrentUid(),targetUid:targetUid,cid:Store.getClientId(),targetCid:targetCid,name:Store.getCurrentName()};//id消息id uid 身份id
     },
     useChannel:function (callback) {
         this.applyChannel(this.ip,callback);

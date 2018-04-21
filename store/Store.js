@@ -87,6 +87,7 @@ var Store = {
             if (keyData.id == id) {
                 this.uid = id;
                 this.keyData = keyData;
+                this._fire("uidChanged",id);
             }
         }
 
