@@ -61,7 +61,7 @@ var WSChannel={
                 };
 
                 this.ws.onerror = function incoming(event) {
-                    console.info("error: "+event.toString());
+                    console.trace(event);
 
                 };
                 this.ws.onclose = (event)=>{
@@ -180,11 +180,11 @@ var WSChannel={
         this._sendRequest(req,timeoutCallback);
     },
     applyMakeFriends:function (targetId,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("applyMakeFriends",{name:Store.getCurrentName(),publicKey:Store.getPublicKey()},callback,targetId);
+        var req = WSChannel.newRequestMsg("applyMakeFriends",{name:Store.getCurrentName(),publicKey:Store.getPublicKey(),pic:Store.getPersonalPic()},callback,targetId);
         this._sendRequest(req,timeoutCallback);
     },
     applyMakeFriendsHandler:function(msg,callback){
-        Store.receiveMKFriends(msg.uid,msg.data.name,msg.data.publicKey);
+        Store.receiveMKFriends(msg.uid,msg.data.name,msg.data.publicKey,msg.data.pic);
         callback();
     },
     acceptMakeFriends:function (targetId,callback,timeoutCallback) {
@@ -437,6 +437,15 @@ var WSChannel={
     resendGroupFileHandler:function(msg,callback){
         Store.receiveGroupFile(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
     },
+    setPersonalPic:function (pic,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("setPersonalPic",{pic:pic},(data)=>{
+            if(!data.err){
+                Store.setPersonalPic(pic);
+            }
+            callback(data);
+        });
+        this._sendRequest(req,timeoutCallback);
+    }
 };
 Store.on("readChatRecords",function (data) {
     var uid = data.uid;
