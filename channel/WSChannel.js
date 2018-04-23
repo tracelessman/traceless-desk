@@ -16,7 +16,7 @@ var WSChannel={
         var id = msgId||this.generataMsgId();
         if(callback)
             this.callbacks[id] = callback;
-        return  {id:id,action:action,data:data,uid:Store.getCurrentUid(),targetUid:targetUid,cid:Store.getClientId(),targetCid:targetCid,name:Store.getCurrentName()};//id消息id uid 身份id
+        return  {id:id,action:action,data:data,uid:Store.getCurrentUid(),targetUid:targetUid,cid:Store.getClientId(),targetCid:targetCid};//id消息id uid 身份id
     },
     useChannel:function (callback) {
         this.applyChannel(this.ip,callback);
@@ -103,8 +103,8 @@ var WSChannel={
             delete this.ws;
         }
     },
-    register:function (ip,uid,name,publicKey,checkCode,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("register",{uid:uid,name:name,publicKey:publicKey,checkCode:checkCode},callback)
+    register:function (ip,uid,cid,name,publicKey,checkCode,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("register",{uid:uid,cid:cid,name:name,publicKey:publicKey,checkCode:checkCode},callback)
         this._sendRequest(req,timeoutCallback,ip);
     },
     _timeoutHandler : function (reqId,callback) {
@@ -205,7 +205,7 @@ var WSChannel={
         return encrypted;
     },
     sendMessage:function (targetId,text,callback) {
-        var req = WSChannel.newRequestMsg("sendMessage",{text:this.encrypt(text,Store.getFriend(targetId).publicKey)},(data,msgId)=>{
+        var req = WSChannel.newRequestMsg("sendMessage",{text:this.encrypt(text,Store.getFriend(targetId).publicKey),name:Store.getCurrentName()},(data,msgId)=>{
             Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },targetId);
         Store.sendMessage(targetId,text,req.id,()=>{
@@ -219,7 +219,7 @@ var WSChannel={
     },
     resendMessage:function (msgId,targetId,text) {
         Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SENDING);
-        var req = WSChannel.newRequestMsg("resendMessage",{text:this.encrypt(text,Store.getFriend(targetId).publicKey)},(data)=>{
+        var req = WSChannel.newRequestMsg("resendMessage",{text:this.encrypt(text,Store.getFriend(targetId).publicKey),name:Store.getCurrentName()},(data)=>{
             Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },targetId,null,msgId);
         this._sendRequest(req,()=>{
@@ -233,7 +233,7 @@ var WSChannel={
         Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text),callback);
     },
     sendImage:function (targetId,data,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendImage",{data:data},(data,msgId)=>{
+        var req = WSChannel.newRequestMsg("sendImage",{data:data,name:Store.getCurrentName()},(data,msgId)=>{
             Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },targetId);
         Store.sendImage(targetId,data,req.id,()=>{
@@ -246,7 +246,7 @@ var WSChannel={
     },
     resendImage:function (msgId,targetId,data) {
         Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SENDING);
-        var req = WSChannel.newRequestMsg("resendImage",{data:data},(data)=>{
+        var req = WSChannel.newRequestMsg("resendImage",{data:data,name:Store.getCurrentName()},(data)=>{
             Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },targetId,null,msgId);
         this._sendRequest(req,()=>{
@@ -270,8 +270,8 @@ var WSChannel={
     addGroupFromOtherDevice:function(msg){
         Store.addGroup(msg.data.groupId,msg.data.groupName,msg.data.members);
     },
-    sendGroupMessage:function (groupId,text,callback) {
-        var req = WSChannel.newRequestMsg("sendGroupMessage",{groupId:groupId,text:this.encrypt(text,Store.getServerPublicKey())},(data,msgId)=>{
+    sendGroupMessage:function (groupId,groupName,text,callback) {
+        var req = WSChannel.newRequestMsg("sendGroupMessage",{groupId:groupId,groupName:groupName,name:Store.getCurrentName(),text:this.encrypt(text,Store.getServerPublicKey())},(data,msgId)=>{
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         });
         Store.sendGroupMessage(groupId,text,req.id,()=>{
@@ -282,9 +282,9 @@ var WSChannel={
             });
         });
     },
-    resendGroupMessage:function (msgId,groupId,text) {
+    resendGroupMessage:function (msgId,groupId,groupName,text) {
         Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SENDING);
-        var req = WSChannel.newRequestMsg("resendGroupMessage",{groupId:groupId,text:this.encrypt(text,Store.getServerPublicKey())},(data)=>{
+        var req = WSChannel.newRequestMsg("resendGroupMessage",{groupId:groupId,groupName:groupName,name:Store.getCurrentName(),text:this.encrypt(text,Store.getServerPublicKey())},(data)=>{
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },null,null,msgId);
         this._sendRequest(req,()=>{
@@ -297,8 +297,8 @@ var WSChannel={
     resendGroupMessageHandler:function(msg,callback){
         Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text),callback);
     },
-    sendGroupImage:function (groupId,data,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendGroupImage",{groupId:groupId,data:data},(data,msgId)=>{
+    sendGroupImage:function (groupId,groupName,data,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("sendGroupImage",{groupId:groupId,groupName:groupName,name:Store.getCurrentName(),data:data},(data,msgId)=>{
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         });
         Store.sendGroupImage(groupId,data,req.id,()=>{
@@ -309,9 +309,9 @@ var WSChannel={
             });
         });
     },
-    resendGroupImage:function (msgId,groupId,data) {
+    resendGroupImage:function (msgId,groupId,groupName,data) {
         Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SENDING);
-        var req = WSChannel.newRequestMsg("resendGroupImage",{groupId:groupId,data:data},(data)=>{
+        var req = WSChannel.newRequestMsg("resendGroupImage",{groupId:groupId,groupName:groupName,name:Store.getCurrentName(),data:data},(data)=>{
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },null,null,msgId);
         this._sendRequest(req,()=>{
@@ -384,7 +384,7 @@ var WSChannel={
         })
     },
     sendFile:function (targetId,data,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendFile",data,(data,msgId)=>{
+        var req = WSChannel.newRequestMsg("sendFile",{file:data,name:Store.getCurrentName()},(data,msgId)=>{
             Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },targetId);
         Store.sendFile(targetId,data,req.id,()=>{
@@ -397,7 +397,7 @@ var WSChannel={
     },
     resendFile:function (msgId,targetId,data) {
         Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SENDING);
-        var req = WSChannel.newRequestMsg("resendFile",data,(data)=>{
+        var req = WSChannel.newRequestMsg("resendFile",{file:data,name:Store.getCurrentName()},(data)=>{
             Store.updateMessageState(targetId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },targetId,null,msgId);
         this._sendRequest(req,()=>{
@@ -405,13 +405,13 @@ var WSChannel={
         });
     },
     sendFileHandler:function(msg,callback){
-        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data,callback);
+        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data.file,callback);
     },
     resendFileHandler:function(msg,callback){
-        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data,callback);
+        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data.file,callback);
     },
-    sendGroupFile:function (groupId,data,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("sendGroupFile",{groupId:groupId,data:data},(data,msgId)=>{
+    sendGroupFile:function (groupId,groupName,data,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("sendGroupFile",{groupId:groupId,data:data,groupName:groupName,name:Store.getCurrentName()},(data,msgId)=>{
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         });
         Store.sendGroupFile(groupId,data,req.id,()=>{
@@ -422,9 +422,9 @@ var WSChannel={
             });
         });
     },
-    resendGroupFile:function (msgId,groupId,data) {
+    resendGroupFile:function (msgId,groupId,groupName,data) {
         Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SENDING);
-        var req = WSChannel.newRequestMsg("resendGroupFile",{groupId:groupId,data:data},(data)=>{
+        var req = WSChannel.newRequestMsg("resendGroupFile",{groupId:groupId,data:data,groupName:groupName,name:Store.getCurrentName()},(data)=>{
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
         },null,null,msgId);
         this._sendRequest(req,()=>{
