@@ -205,9 +205,11 @@
             var rec = window.top.Store.getGroupChatRecord(otherId,msgId);
             if(rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
                 if(rec.text){
-                    window.top.WSChannel.resendGroupMessage(rec.msgId,otherId,rec.text);
+                    window.top.WSChannel.resendGroupMessage(rec.msgId,otherId,window.top.Store.getGroup(otherId).name,rec.text);
+                }else if(rec.file){
+                    window.top.WSChannel.resendGroupFile(rec.msgId,otherId,window.top.Store.getGroup(otherId).name,rec.file);
                 }else{
-                    window.top.WSChannel.resendGroupImage(rec.msgId,otherId,rec.img)
+                    window.top.WSChannel.resendGroupImage(rec.msgId,otherId,window.top.Store.getGroup(otherId).name,rec.img)
                 }
             }else{
                 document.getElementById("msgStateDetailBox").style.display = "";
@@ -233,6 +235,9 @@
             if(rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
                 if(rec.text)
                     window.top.WSChannel.resendMessage(rec.msgId,otherId,rec.text);
+                else if(rec.file){
+                    window.top.WSChannel.resendFile(rec.msgId,otherId,rec.file);
+                }
                 else
                     window.top.WSChannel.resendImage(rec.msgId,otherId,rec.img)
             }
@@ -310,28 +315,10 @@
 
     refreshRecordList();
 
-    function send(){
-        var text = document.getElementById("chatBox").contentWindow.document.body.innerHTML;
-        if(text){
-            var textObj = {type:"html",content:text};
-            if(isGroupChat){
-                window.top.WSChannel.sendGroupMessage(otherId,textObj,()=>{
-                    window.top.Store.sendGroupMessage(otherId,textObj);
-                    document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
-                });
-            }else{
-                window.top.WSChannel.sendMessage(otherId,textObj,()=>{
-                    window.top.Store.sendMessage(otherId,textObj);
-                    document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
-                });
-            }
-        }
 
-
-    }
     function sendText(text) {
         if(isGroupChat){
-            window.top.WSChannel.sendGroupMessage(otherId,text,()=>{
+            window.top.WSChannel.sendGroupMessage(otherId,window.top.Store.getGroup(otherId).name,text,()=>{
 //                window.top.Store.sendGroupMessage(otherId,text);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
@@ -345,7 +332,7 @@
     function sendImg(data,width,height) {
         var d = {data:data,width:width,height:height};
         if(isGroupChat){
-            window.top.WSChannel.sendGroupImage(otherId,d,()=>{
+            window.top.WSChannel.sendGroupImage(otherId,window.top.Store.getGroup(otherId).name,d,()=>{
 //                window.top.Store.sendGroupImage(otherId,data);
 //                document.getElementById("chatBox").contentWindow.document.body.innerHTML = "";
             });
@@ -430,7 +417,7 @@
     }
     function sendFile (event,arg) {
         if(isGroupChat){
-            window.top.WSChannel.sendGroupFile(otherId,arg,()=>{
+            window.top.WSChannel.sendGroupFile(otherId,window.top.Store.getGroup(otherId).name,arg,()=>{
             });
         }else{
             window.top.WSChannel.sendFile(otherId,arg,()=>{

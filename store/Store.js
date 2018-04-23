@@ -87,6 +87,7 @@ var Store = {
             if (keyData.id == id) {
                 this.uid = id;
                 this.keyData = keyData;
+                this._fire("uidChanged",id);
             }
         }
 
@@ -120,7 +121,7 @@ var Store = {
         return this.keyData.mkfriends.newReceive;
     },
     //接收交友请求
-    receiveMKFriends : function (fromId,fromName,publicKey) {
+    receiveMKFriends : function (fromId,fromName,publicKey,pic) {
         for(var i=0;i<this.data.length;i++) {
             var keyData = this.data[i];
             if (keyData.id == this.uid) {
@@ -139,7 +140,7 @@ var Store = {
                     }
                 }
                 if(!update){
-                    keyData.mkfriends.receive.push({name:fromName,id:fromId,publicKey:publicKey,state:0});
+                    keyData.mkfriends.receive.push({name:fromName,id:fromId,publicKey:publicKey,pic:pic,state:0});
                 }
                 keyData.mkfriends.newReceive = true;
                 this._save();
@@ -615,6 +616,13 @@ var Store = {
     },
     foreSave:function (callback) {
         this._save(callback);
+    },
+    setPersonalPic:function (pic) {
+        this.keyData.pic = pic;
+        this._save();
+    },
+    getPersonalPic:function () {
+        return this.keyData.pic;
     }
     // rejectMKFriends : function (index) {
     //     for(var i=0;i<this.data.length;i++) {
