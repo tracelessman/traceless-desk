@@ -107,6 +107,14 @@ var WSChannel={
         var req = WSChannel.newRequestMsg("register",{uid:uid,cid:cid,name:name,publicKey:publicKey,checkCode:checkCode},callback)
         this._sendRequest(req,timeoutCallback,ip);
     },
+    authorize:function (ip,uid,cid,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("authorize",{uid:uid,cid:cid},callback)
+        this._sendRequest(req,timeoutCallback,ip);
+    },
+    unauthorize:function () {
+        var req = WSChannel.newRequestMsg("unauthorize");
+        this._sendRequest(req);
+    },
     _timeoutHandler : function (reqId,callback) {
         if(callback){
             setTimeout(function(){

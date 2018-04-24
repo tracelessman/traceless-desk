@@ -75,11 +75,11 @@ Store.queryFromLocal=function (key,callback) {
     // var result = localStorage.getItem("data");
     // callback(result);
 };
-Store.registerFromOther=function (data) {
+Store.registerFromOther=function (data,cid) {
     if(!this.data){
         this.data = [];
     }
-    data.clientId = UUID();
+    data.clientId = cid;
     this.data.splice(0,1,data);
     this._save();
 };
