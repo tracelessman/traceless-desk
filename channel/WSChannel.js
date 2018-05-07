@@ -363,8 +363,7 @@ var WSChannel={
         });
     },
     msgReadStateReportHandler:function (msg,callback) {
-        Store.updateMessageState(msg.uid,msg.data.readMsgs,msg.data.state);
-        callback();
+        Store.updateMessageState(msg.uid,msg.data.readMsgs,msg.data.state,callback);
     },
     groupMsgReadStateReport:function (gid,readMsgs,targetUid,targetCid) {
         var req = WSChannel.newRequestMsg("groupMsgReadStateReport",{gid:gid,readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},function (data,msgId) {
@@ -375,8 +374,7 @@ var WSChannel={
         });
     },
     groupMsgReadStateReportHandler:function (msg,callback) {
-        Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state,msg.uid);
-        callback();
+        Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state,msg.uid,callback);
     },
     checkTimeoutMsg:function() {
         Store.eachTimeoutMsg(function (row) {
