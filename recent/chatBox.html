@@ -97,6 +97,7 @@
                             var height = parseInt(RegExp.$1);
                         }
                         if(data){
+                            data = data.substring(data.indexOf(",")+1);
                             window.parent.sendImg(data,width,height);
                         }
                     }else{

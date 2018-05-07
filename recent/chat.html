@@ -145,33 +145,26 @@
     document.body.className = window.top.theme;
     initFaces();
     function _getMessage(rec) {
-        if(rec.text){
-            var text;
-            if(rec.text.content){
-                text = rec.text.content;
-            }else{
-                text = rec.text;
-            }
+        if(rec.type==window.top.Store.MESSAGE_TYEP_TEXT){
+            var text = rec.content;
            return text.replace("\r\n","<div></div>");
-        }else if(rec.img){
-            if(rec.img.data){
-                var w=200;
-                var h=200;
-                var n = 1;
-                if(rec.img.width>rec.img.height){
-                   n = Math.ceil(rec.img.width/200);
-                }else{
-                    n = Math.ceil(rec.img.height/200);
-                }
-                w = rec.img.width/n;
-                h = rec.img.height/n;
-
-                return "<img src='"+rec.img.data+"' n='"+n+"' width='"+w+"' height='"+h+"'/>";
+        }else if(rec.type==window.top.Store.MESSAGE_TYPE_IMAGE){
+            var img = JSON.parse(rec.content);
+            var w=200;
+            var h=200;
+            var n = 1;
+            if(img.width>img.height){
+                n = Math.ceil(img.width/200);
             }else{
-                return "<img src='"+rec.img+"'/>";
+                n = Math.ceil(img.height/200);
             }
-        }else if(rec.file){
-            return '<div onclick=showFile(\"'+(rec.id?rec.id:"")+'\",\"'+rec.msgId+'\")><i class="material-icons" style="color: #b0b0b0;font-size: 40px;cursor: pointer;">insert_drive_file</i><span>'+rec.file.name+'</span></div>';
+            w = img.width/n;
+            h = img.height/n;
+
+            return "<img src='data:image/png;base64,"+img.data+"' n='"+n+"' width='"+w+"' height='"+h+"'/>";
+        }else if(rec.type==window.top.Store.MESSAGE_TYPE_FILE){
+            var file = JSON.parse(rec.content);
+            return '<div onclick=showFile(\"'+(rec.senderUid?rec.senderUid:"")+'\",\"'+rec.msgId+'\")><i class="material-icons" style="color: #b0b0b0;font-size: 40px;cursor: pointer;">insert_drive_file</i><span>'+file.name+'</span></div>';
         }
     }
     var ps = document.location.href.substring(document.location.href.indexOf("?")+1);
@@ -202,45 +195,60 @@
     }
     function onMsgStateTouch(msgId){
         if(isGroupChat){
-            var rec = window.top.Store.getGroupChatRecord(otherId,msgId);
-            if(rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
-                if(rec.text){
-                    window.top.WSChannel.resendGroupMessage(rec.msgId,otherId,window.top.Store.getGroup(otherId).name,rec.text);
-                }else if(rec.file){
-                    window.top.WSChannel.resendGroupFile(rec.msgId,otherId,window.top.Store.getGroup(otherId).name,rec.file);
-                }else{
-                    window.top.WSChannel.resendGroupImage(rec.msgId,otherId,window.top.Store.getGroup(otherId).name,rec.img)
-                }
-            }else{
-                document.getElementById("msgStateDetailBox").style.display = "";
-                var members =window.top.Store.getGroup(otherId).members;
-                var html="";
-                for(var i=0;i<members.length;i++){
-                    var f = members[i];
-                    if(f.uid!=window.top.Store.getCurrentUid()){
-                        var state = rec.states[f.uid]||rec.state;
-                        var iconName = getIconNameByState(state);
-                        html+="<div style='display: flex;flex-direction: row;justify-content: space-around;align-items: center'><span>";
-                        html+=f.name;
-                        html+="</span><i class=\"material-icons\">";
-                        html+=iconName;
-                        html+="</i> </div>";
+            var rec = window.top.Store.getGroupChatRecord(otherId,msgId,null,(rec)=>{
+                if(rec){
+                    if(rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
+                        if(rec.type==window.top.Store.MESSAGE_TYEP_TEXT){
+                            window.top.WSChannel.resendGroupMessage(rec.msgId,otherId,window.top.Store.getGroup(otherId).name,rec.content);
+                        }else if(rec.type==window.top.Store.MESSAGE_TYPE_FILE){
+                            window.top.WSChannel.resendGroupFile(rec.msgId,otherId,window.top.Store.getGroup(otherId).name,JSON.parse(rec.content));
+                        }else{
+                            window.top.WSChannel.resendGroupImage(rec.msgId,otherId,window.top.Store.getGroup(otherId).name,JSON.parse(rec.content));
+                        }
+                    }else{
+                        document.getElementById("msgStateDetailBox").style.display = "";
+                        var members =window.top.Store.getGroup(otherId).members;
+                        window.top.Store.getRecordStateReports(otherId,msgId,(states)=>{
+                            var html="";
+                            for(var i=0;i<members.length;i++){
+                                var f = members[i];
+                                if(f.uid!=window.top.Store.getCurrentUid()){
+                                    var state = rec.state;
+                                    for(var j=0;j<states.length;j++){
+                                        if(states[j].reporterUid == f.uid){
+                                            state = states[j].state;
+                                        }
+                                    }
+
+                                    var iconName = getIconNameByState(state);
+                                    html+="<div style='display: flex;flex-direction: row;justify-content: space-around;align-items: center'><span>";
+                                    html+=f.name;
+                                    html+="</span><i class=\"material-icons\">";
+                                    html+=iconName;
+                                    html+="</i> </div>";
+                                }
+                            }
+                            document.getElementById("msgStateDetailBox").innerHTML=html;
+                        })
+
                     }
                 }
-                document.getElementById("msgStateDetailBox").innerHTML=html;
-            }
 
+            });
         }else{
-            var rec = window.top.Store.getRecentChatRecord(otherId,msgId);
-            if(rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
-                if(rec.text)
-                    window.top.WSChannel.resendMessage(rec.msgId,otherId,rec.text);
-                else if(rec.file){
-                    window.top.WSChannel.resendFile(rec.msgId,otherId,rec.file);
+            window.top.Store.getRecentChatRecord(otherId,msgId,null,(rec)=>{
+                if(rec&&rec.state==window.top.Store.MESSAGE_STATE_SERVER_NOT_RECEIVE){
+                    if(rec.type==window.top.Store.MESSAGE_TYEP_TEXT) {
+                        window.top.WSChannel.resendMessage(rec.msgId, otherId, rec.content);
+                    }
+                    else if(rec.type==window.top.Store.MESSAGE_TYPE_FILE){
+                        window.top.WSChannel.resendFile(rec.msgId,otherId,JSON.parse(rec.content));
+                    }
+                    else
+                        window.top.WSChannel.resendImage(rec.msgId,otherId,JSON.parse(rec.content));
                 }
-                else
-                    window.top.WSChannel.resendImage(rec.msgId,otherId,rec.img)
-            }
+            });
+
 
         }
     }
@@ -249,14 +257,8 @@
             document.getElementById("msgStateDetailBox").style.display="none";
         }
     }
-    document.addEventListener("mousedown",hideDetaiBox)
-    function refreshRecordList() {
-        var records = [];
-        if(isGroupChat){
-            records = window.top.Store.readGroupChatRecords(otherId,!window.top.remote.getGlobal("mainWindow").isFocused());
-        }else{
-            records = window.top.Store.readAllChatRecords(otherId,!window.top.remote.getGlobal("mainWindow").isFocused());
-        }
+    document.addEventListener("mousedown",hideDetaiBox);
+    function _computeRecordHtml(records) {
         var html = "";
         var name = window.top.Store.getCurrentName();
         var lastSpTime;
@@ -278,10 +280,10 @@
 
                 }
             }
-            if (records[i].id) {
+            if (records[i].senderUid) {
                 html += "<div style=\"display: flex;flex-direction: row;justify-content: flex-start;align-items: flex-start;width: 100%;margin-top: 10px;margin-bottom: 10px\">";
                 html += "<div style=\"text-align:center;margin-left:10px;margin-right:5px;width:40px;height:40px;padding:0px 5px; line-height:40px;background-color:palevioletred;border-radius: 20px;color: white;white-space: nowrap;font-size: 10px\"><div style='width:30px;overflow: hidden;text-overflow: ellipsis'>";
-                html += isGroupChat?window.top.Store.getMember(otherId,records[i].id).name:window.top.Store.getFriend(otherId).name;
+                html += isGroupChat?window.top.Store.getMember(otherId,records[i].senderUid).name:window.top.Store.getFriend(otherId).name;
                 html += "</div></div>";
                 html += "<div style='width:11px;height:18px;background-image: url(../images/chat-y-l.png);margin-top: 11px'></div>";
                 html += "<div style=\"max-width:250px;min-height:40px;border-radius: 5px;overflow: hidden;padding: 12px 10px;background-color: #f9e160\">";
@@ -311,6 +313,14 @@
         }
         document.getElementById("records").innerHTML = html;
         document.getElementById("records").scrollTop=document.getElementById("records").scrollHeight-document.getElementById("records").offsetHeight;
+    }
+    function refreshRecordList() {
+        if(isGroupChat){
+            window.top.Store.readGroupChatRecords(otherId,!window.top.remote.getGlobal("mainWindow").isFocused(),_computeRecordHtml);
+        }else{
+            window.top.Store.readAllChatRecords(otherId,!window.top.remote.getGlobal("mainWindow").isFocused(),_computeRecordHtml);
+        }
+
     }
 
     refreshRecordList();
@@ -424,21 +434,27 @@
             });
         }
     }
+    function _showFile(rec) {
+        if(rec){
+            var file = JSON.parse(rec.content);
+            var filePath = window.top.path.join(window.top.os.tmpdir(),file.name);
+            window.top.fs.writeFile(filePath,window.top.Buffer.from(file.data),function (err) {
+                if(!err){
+                    var result = window.top.shell.openItem(filePath);
+                    if(!result){
+                        window.top.shell.showItemInFolder(filePath);
+                    }
+                }
+            });
+        }
+    }
     function showFile(uid,msgId){
         if(isGroupChat){
-            var rec = window.top.Store.getGroupChatRecord(otherId,msgId,uid);
+            window.top.Store.getGroupChatRecord(otherId,msgId,uid,_showFile);
         }else{
-            var rec = window.top.Store.getRecentChatRecord(otherId,msgId,uid);
+            window.top.Store.getRecentChatRecord(otherId,msgId,uid,_showFile);
         }
-        var filePath = window.top.path.join(window.top.os.tmpdir(),rec.file.name);
-        window.top.fs.writeFile(filePath,window.top.Buffer.from(rec.file.data),function (err) {
-            if(!err){
-                var result = window.top.shell.openItem(filePath);
-                if(!result){
-                    window.top.shell.showItemInFolder(filePath);
-                }
-            }
-        });
+
     }
     function captureDesktop() {
         window.top.ipc.send("openCaptureBrowser");

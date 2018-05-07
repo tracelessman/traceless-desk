@@ -107,6 +107,14 @@ var WSChannel={
         var req = WSChannel.newRequestMsg("register",{uid:uid,cid:cid,name:name,publicKey:publicKey,checkCode:checkCode},callback)
         this._sendRequest(req,timeoutCallback,ip);
     },
+    authorize:function (ip,uid,cid,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("authorize",{uid:uid,cid:cid},callback)
+        this._sendRequest(req,timeoutCallback,ip);
+    },
+    unauthorize:function () {
+        var req = WSChannel.newRequestMsg("unauthorize");
+        this._sendRequest(req);
+    },
     _timeoutHandler : function (reqId,callback) {
         if(callback){
             setTimeout(function(){
@@ -355,8 +363,7 @@ var WSChannel={
         });
     },
     msgReadStateReportHandler:function (msg,callback) {
-        Store.updateMessageState(msg.uid,msg.data.readMsgs,msg.data.state);
-        callback();
+        Store.updateMessageState(msg.uid,msg.data.readMsgs,msg.data.state,callback);
     },
     groupMsgReadStateReport:function (gid,readMsgs,targetUid,targetCid) {
         var req = WSChannel.newRequestMsg("groupMsgReadStateReport",{gid:gid,readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},function (data,msgId) {
@@ -367,8 +374,7 @@ var WSChannel={
         });
     },
     groupMsgReadStateReportHandler:function (msg,callback) {
-        Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state,msg.uid);
-        callback();
+        Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state,msg.uid,callback);
     },
     checkTimeoutMsg:function() {
         Store.eachTimeoutMsg(function (row) {
