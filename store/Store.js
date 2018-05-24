@@ -241,13 +241,13 @@ var Store = {
         }
         return this.keyData.recent;
     },
-    deleteRecent:function (id) {
+    deleteRecent:function (id,callback) {
         var recents = this.getAllRecent();
         for(var j=0;j<recents.length;j++){
             if(recents[j].id==id){
                 recents.splice(j,1);
                 this._save(()=>{
-                    this._deleteLocalRecords(id);
+                    this._deleteLocalRecords(id,callback);
                 });
                 break;
             }
@@ -373,6 +373,7 @@ var Store = {
         this._save();
     },
     getGroups:function () {
+
         var groups = this.keyData.groups;
         if(!groups){
             groups = [];
@@ -403,6 +404,32 @@ var Store = {
     },
     getGroup:function (id) {
         return this._getGroup(id,false);
+    },
+    addGroupMembers:function (gid,newMembers,allMembers) {
+        var group = this.getGroup(gid);
+        console.log(group)
+        console.log(newMembers)
+
+        if(!group){
+            this.addGroup(gid,group.name,allMembers);
+        }
+        if(group){
+
+            if(allMembers)
+                group.members = allMembers;
+            else{
+                newMembers.forEach( (m)=> {
+                    var oldMember = this.getMember(gid,m.uid);
+                    if(!oldMember){
+                        var f = this.getFriend(m.uid);
+                        m.name = f.name;
+                        m.pic = f.pic;
+                        group.members.push(m);
+                    }
+                });
+            }
+            this._fire("groupMembersChanged",gid);
+        }
     },
     readGroupChatRecords:function (id,ignoreState,callback) {
         this._getLocalRecords(id, (records) =>{
@@ -591,6 +618,12 @@ var Store = {
     },
     getPersonalPic:function () {
         return this.keyData.pic;
+    },
+    updateFriendPic:function (uid,pic) {
+        var f = getFriend(uid);
+        if(f){
+            f.pic = pic;
+        }
     }
     // rejectMKFriends : function (index) {
     //     for(var i=0;i<this.data.length;i++) {

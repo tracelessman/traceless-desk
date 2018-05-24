@@ -5,6 +5,27 @@ var Store = require("../store/Store")
 
 
 var WSChannel={
+    _listeners:new Map(),
+    on:function (event,fun) {
+        var ary=this._listeners.get(event)
+        if(!ary){
+            ary = [];
+            this._listeners.set(event,ary);
+        }
+        ary.push(fun);
+    },
+    un:function (event,fun) {
+        var ary=this._listeners.get(event);
+        ary.splice(ary.indexOf(fun),1);
+    },
+    _fire:function (event,params) {
+        var ary=this._listeners.get(event)
+        if(ary){
+            ary.forEach(function(o){
+                o(params);
+            });
+        }
+    },
     timeout:60000,
     _lastPongTime:null,
     seed:Date.now(),
@@ -177,6 +198,7 @@ var WSChannel={
                 Store.foreSave();
 
                 callback(msg);
+                WSChannel._fire("afterLogin");
                 WSChannel.checkTimeoutMsg();
 
             });
@@ -451,6 +473,35 @@ var WSChannel={
             callback(data);
         });
         this._sendRequest(req,timeoutCallback);
+    },
+
+    setPersonalPicFromOtherDevice:function(msg){
+        Store.setPersonalPic(msg.data.pic);
+    },
+    setPersonalPicHandler:function(msg){
+        Store.updateFriendPic(msg.uid,msg.data.pic);
+    },
+    addGroupMembers:function (gid,uids,errCallback,timeoutCallback) {
+        console.log(uids)
+        var req = WSChannel.newRequestMsg("addGroupMembers",{groupId:gid,newMembers:uids},(data)=>{
+            console.log(data)
+            if(data.err){
+                if(errCallback)
+                    errCallback(data.err);
+            }else{
+                Store.addGroupMembers(gid,uids);
+            }
+        },null,null,null);
+        this._sendRequest(req,timeoutCallback);
+    },
+    addGroupMembersHandler:function (msg,callback) {
+        Store.addGroupMembers(msg.groupId,msg.newMembers,msg.allMembers);
+    },
+    leaveGroup:function (gid) {
+
+    },
+    deleteContact:function (uid) {
+
     }
 };
 Store.on("readChatRecords",function (data) {

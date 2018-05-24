@@ -305,9 +305,14 @@
                 html += _getMessage(records[i]);
                 html+="</div>";
                 html += "<div style='width:11px;height:18px;background-image: url(../images/chat-w-r.png);margin-top: 11px'></div>";
-                html += "<div style=\"text-align:center;margin-left:5px;margin-right:10px;width:40px;height:40px;padding:0px 5px; line-height:40px;background-color:dodgerblue;border-radius: 20px;color: white;white-space: nowrap;font-size: 10px\"><div style='width:30px;overflow: hidden;text-overflow: ellipsis'>";
-                html += name;
-                html += "</div></div>";
+                if(window.top.Store.getPersonalPic()){
+                    html += "<img src='"+window.top.Store.getPersonalPic()+"' style='margin-left:5px;margin-right:10px;width:40px;height:40px;border-radius: 20px;'>";
+                }else{
+                    html += "<div style=\"text-align:center;margin-left:5px;margin-right:10px;width:40px;height:40px;padding:0px 5px; line-height:40px;background-color:dodgerblue;border-radius: 20px;color: white;white-space: nowrap;font-size: 10px\"><div style='width:30px;overflow: hidden;text-overflow: ellipsis'>";
+                    html += name;
+                    html += "</div></div>";
+                }
+
                 html+="</div>";
             }
         }
