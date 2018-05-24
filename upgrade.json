@@ -113,6 +113,10 @@
       "version":"0.5.0",
       "files":["channel/WSChannel.js","index/register.html","mine/mine.html","recent/chat.html","recent/chatBox.html","store/LocalStore.js","store/Store.js"],
       "detail":[""]
+    },{
+      "version":"0.5.1",
+      "files":["channel/WSChannel.js","mine/mine.html","recent/chat.html","store/Store.js"],
+      "detail":[""]
     }
   ]
 
