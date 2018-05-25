@@ -282,9 +282,17 @@
             }
             if (records[i].senderUid) {
                 html += "<div style=\"display: flex;flex-direction: row;justify-content: flex-start;align-items: flex-start;width: 100%;margin-top: 10px;margin-bottom: 10px\">";
-                html += "<div style=\"text-align:center;margin-left:10px;margin-right:5px;width:40px;height:40px;padding:0px 5px; line-height:40px;background-color:palevioletred;border-radius: 20px;color: white;white-space: nowrap;font-size: 10px\"><div style='width:30px;overflow: hidden;text-overflow: ellipsis'>";
-                html += isGroupChat?window.top.Store.getMember(otherId,records[i].senderUid).name:window.top.Store.getFriend(otherId).name;
-                html += "</div></div>";
+                var p = isGroupChat?window.top.Store.getMember(otherId,records[i].senderUid):window.top.Store.getFriend(otherId);
+
+                if(p.pic){
+                    html += "<img src='"+p.pic+"' style='margin-left:10px;margin-right:5px;width:40px;height:40px;border-radius: 20px;'>";
+                }else{
+                    html += "<div style=\"text-align:center;margin-left:10px;margin-right:5px;width:40px;height:40px;padding:0px 5px; line-height:40px;background-color:palevioletred;border-radius: 20px;color: white;white-space: nowrap;font-size: 10px\"><div style='width:30px;overflow: hidden;text-overflow: ellipsis'>";
+                    html += p.name;
+                    html += "</div></div>";
+
+                }
+
                 html += "<div style='width:11px;height:18px;background-image: url(../images/chat-y-l.png);margin-top: 11px'></div>";
                 html += "<div style=\"max-width:250px;min-height:40px;border-radius: 5px;overflow: hidden;padding: 12px 10px;background-color: #f9e160\">";
                 html += _getMessage(records[i]);
