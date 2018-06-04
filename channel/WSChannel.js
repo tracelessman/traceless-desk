@@ -1,6 +1,4 @@
-/**
- * Created by renbaogang on 2017/10/28.
- */
+/* eslint-disable */
 var Store = require("../store/Store")
 
 
@@ -124,8 +122,8 @@ var WSChannel={
             delete this.ws;
         }
     },
-    register:function (ip,uid,cid,name,publicKey,checkCode,callback,timeoutCallback) {
-        var req = WSChannel.newRequestMsg("register",{uid:uid,cid:cid,name:name,publicKey:publicKey,checkCode:checkCode},callback)
+    register:function (ip,uid,cid,deviceId,name,publicKey,checkCode,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("register",{uid:uid,cid:cid,deviceId:deviceId,name:name,publicKey:publicKey,checkCode:checkCode},callback)
         this._sendRequest(req,timeoutCallback,ip);
     },
     authorize:function (ip,uid,cid,callback,timeoutCallback) {
