@@ -135,14 +135,14 @@ var WSChannel={
         this._sendRequest(req);
     },
     _timeoutHandler : function (reqId,callback) {
-        if(callback){
-            setTimeout(function(){
-                if(WSChannel.callbacks[reqId]){//如果还没有得到返回处理
+        setTimeout(function(){
+            if(WSChannel.callbacks[reqId]){//如果还没有得到返回处理
+                WSChannel._fire("badnetwork");
+                if(callback)
                     callback();
-                }
+            }
 
-            },this.timeout);
-        }
+        },this.timeout);
 
     },
     login:function (name,uid,cid,ip,callback,timeoutCallback) {
