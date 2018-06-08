@@ -1,4 +1,4 @@
-
+/* eslint-disable */
 var Store = {
     MESSAGE_STATE_SENDING:0,
     MESSAGE_STATE_SERVER_NOT_RECEIVE:1,
@@ -44,7 +44,7 @@ var Store = {
     _deleteLocalRecords:function (chatId,callback) {
 
     },
-    _getLocalRecords: function (id,callback) {
+    _getLocalRecords: function (id,callback,limit) {
 
     },
     _insertRecord2Local:function (charId,record,callback) {
@@ -279,7 +279,7 @@ var Store = {
             return recent;
         }
     },
-    readAllChatRecords : function (id,ignoreState,callback) {
+    readAllChatRecords : function (id,ignoreState,callback,limit) {
         this._getLocalRecords(id,(records)=>{
             var recent = this.getRecent(id,true);
             if(recent.newReceive==true&&ignoreState!=true){
@@ -298,7 +298,7 @@ var Store = {
             }
             callback(records);
 
-        });
+        },limit);
     },
 
     _markNewReceive:function (id) {
@@ -405,13 +405,10 @@ var Store = {
     getGroup:function (id) {
         return this._getGroup(id,false);
     },
-    addGroupMembers:function (gid,newMembers,allMembers) {
+    addGroupMembers:function (gid,groupName,newMembers,allMembers) {
         var group = this.getGroup(gid);
-        console.log(group)
-        console.log(newMembers)
-
         if(!group){
-            this.addGroup(gid,group.name,allMembers);
+            this.addGroup(gid,groupName,allMembers);
         }
         if(group){
 
@@ -431,7 +428,7 @@ var Store = {
             this._fire("groupMembersChanged",gid);
         }
     },
-    readGroupChatRecords:function (id,ignoreState,callback) {
+    readGroupChatRecords:function (id,ignoreState,callback,limit) {
         this._getLocalRecords(id, (records) =>{
             var g = this._getGroup(id,true);
             if(g.newReceive==true&&ignoreState!=true){
@@ -452,7 +449,7 @@ var Store = {
                 this._save();
             }
             callback(records);
-        });
+        },limit);
     },
     getMembersBaseInfo:function (gid) {
         var g = this._getGroup(gid,true);
@@ -550,13 +547,16 @@ var Store = {
         this._clearLocalRecords()
     },
     clear:function (callback) {
-        var recent = this.getAllRecent();
-        recent.forEach(function (r) {
-            r.newReceive=false;
-        });
+        // var recent = this.getAllRecent();
+        // recent.forEach(function (r) {
+        //     r.newReceive=false;
+        //     r.newMsgNum=0;
+        // });
+        this.keyData.recent=[];
         var groups = this.getGroups();
         groups.forEach(function (r) {
             r.newReceive=false;
+            r.newMsgNum=0;
         });
         this.keyData.mkfriends={};
         this.loginState = false;
@@ -624,6 +624,7 @@ var Store = {
         if(f){
             f.pic = pic;
             this._save();
+            this._fire("updateFriendPic",f)
         }
     }
     // rejectMKFriends : function (index) {

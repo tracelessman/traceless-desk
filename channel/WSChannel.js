@@ -480,27 +480,33 @@ var WSChannel={
         Store.updateFriendPic(msg.uid,msg.data.pic);
     },
     addGroupMembers:function (gid,uids,errCallback,timeoutCallback) {
-        console.log(uids)
-        var req = WSChannel.newRequestMsg("addGroupMembers",{groupId:gid,newMembers:uids},(data)=>{
-            console.log(data)
+        var req = WSChannel.newRequestMsg("addGroupMembers",{groupId:gid,groupName:Store.getGroup(gid).name,newMembers:uids},(data)=>{
             if(data.err){
                 if(errCallback)
                     errCallback(data.err);
             }else{
-                Store.addGroupMembers(gid,uids);
+                Store.addGroupMembers(gid,null,uids);
             }
         },null,null,null);
         this._sendRequest(req,timeoutCallback);
     },
     addGroupMembersHandler:function (msg,callback) {
-        Store.addGroupMembers(msg.groupId,msg.newMembers,msg.allMembers);
+        Store.addGroupMembers(msg.data.groupId,msg.data.groupName,msg.data.newMembers,msg.data.allMembers);
     },
     leaveGroup:function (gid) {
 
     },
     deleteContact:function (uid) {
 
-    }
+    },
+    errReport:function (err) {
+        var req = WSChannel.newRequestMsg("errReport",{err:err,time:Date.now()},function (data,msgId) {
+            Store.removeFromMQ(msgId);
+        });
+        Store.push2MQ(req,function () {
+            WSChannel._sendRequest(req);
+        });
+    },
 };
 Store.on("readChatRecords",function (data) {
     var uid = data.uid;

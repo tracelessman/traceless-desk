@@ -3,10 +3,11 @@
  */
 var WSChannel = require("../channel/WSChannel");
 WSChannel._getRSAInstance = function() {
-    if(!this._RSAInstance){
+    if(!this._RSAInstance||this._uid!=Store.getCurrentUid()){
         this._RSAInstance = new RSAKey();
         this._RSAInstance.setPublicString(Store.getPublicKey());
         this._RSAInstance.setPrivateString(Store.getPrivateKey());
+        this._uid = Store.getCurrentUid();
     }
     return this._RSAInstance;
 }
