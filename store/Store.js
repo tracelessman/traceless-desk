@@ -311,28 +311,52 @@ var Store = {
         this._save();
     },
     receiveMessage:function (fromId,fromCid,msgId,text,callback) {
-        this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,text:text,msgId:msgId,time:Date.now()},()=>{
-            this._markNewReceive(fromId);
-            this._fire("receiveMessage",fromId);
-            if(callback)
-                callback();
+        this._getLocalRecord(fromId,msgId,fromId,(rec)=>{
+            if(!rec){
+                this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,text:text,msgId:msgId,time:Date.now()},()=>{
+                    this._markNewReceive(fromId);
+                    this._fire("receiveMessage",fromId);
+                    if(callback)
+                        callback();
+                });
+            }else{
+                if(callback)
+                    callback();
+            }
         });
+
     },
     receiveImage:function (fromId,fromCid,msgId,img,callback) {
-        this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,img:img,msgId:msgId,time:Date.now()},()=>{
-            this._markNewReceive(fromId);
-            this._fire("receiveMessage",fromId);
-            if(callback)
-                callback();
+        this._getLocalRecord(fromId,msgId,fromId,(rec)=>{
+            if(!rec){
+                this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,img:img,msgId:msgId,time:Date.now()},()=>{
+                    this._markNewReceive(fromId);
+                    this._fire("receiveMessage",fromId);
+                    if(callback)
+                        callback();
+                });
+            }else{
+                if(callback)
+                    callback();
+            }
         });
+
     },
     receiveFile:function (fromId,fromCid,msgId,file,callback) {
-        this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,file:file,msgId:msgId,time:Date.now()},()=>{
-            this._markNewReceive(fromId);
-            this._fire("receiveMessage",fromId);
-            if(callback)
-                callback();
+        this._getLocalRecord(fromId,msgId,fromId,(rec)=>{
+            if(!rec){
+                this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,file:file,msgId:msgId,time:Date.now()},()=>{
+                    this._markNewReceive(fromId);
+                    this._fire("receiveMessage",fromId);
+                    if(callback)
+                        callback();
+                });
+            }else{
+                if(callback)
+                    callback();
+            }
         });
+
     },
     sendMessage:function (targetId,text,msgId,callback) {
         this._insertRecord2Local(targetId,{text:text,msgId:msgId,time:Date.now(),state:Store.MESSAGE_STATE_SENDING},()=>{
@@ -480,12 +504,20 @@ var Store = {
         }
     },
     receiveGroupMessage:function (fromId,fromCid,msgId,groupId,text,callback) {
-        this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,text:text,msgId:msgId,time:Date.now()},()=>{
-            this._markNewGroupReceive(groupId);
-            this._fire("receiveGroupMessage",groupId);
-            if(callback)
-                callback();
+        this._getLocalRecord(groupId,msgId,fromId,(rec)=>{
+            if(!rec){
+                this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,text:text,msgId:msgId,time:Date.now()},()=>{
+                    this._markNewGroupReceive(groupId);
+                    this._fire("receiveGroupMessage",groupId);
+                    if(callback)
+                        callback();
+                });
+            }else{
+                if(callback)
+                    callback();
+            }
         });
+
     },
     sendGroupMessage:function (gid,text,msgId,callback) {
         this._insertRecord2Local(gid,{text:text,msgId:msgId,time:Date.now(),state:Store.MESSAGE_STATE_SENDING},()=>{
@@ -506,20 +538,36 @@ var Store = {
         this._getLocalRecord(gid,msgId,uid,callback);
     },
     receiveGroupImage:function (fromId,fromCid,msgId,groupId,img,callback) {
-        this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,img:img,msgId:msgId,time:Date.now()},()=>{
-            this._markNewGroupReceive(groupId);
-            this._fire("receiveGroupMessage",groupId);
-            if(callback)
-                callback();
+        this._getLocalRecord(groupId,msgId,fromId,(rec)=>{
+            if(!rec){
+                this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,img:img,msgId:msgId,time:Date.now()},()=>{
+                    this._markNewGroupReceive(groupId);
+                    this._fire("receiveGroupMessage",groupId);
+                    if(callback)
+                        callback();
+                });
+            }else{
+                if(callback)
+                    callback();
+            }
         });
+
     },
     receiveGroupFile:function (fromId,fromCid,msgId,groupId,file,callback) {
-        this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,file:file,msgId:msgId,time:Date.now()},()=>{
-            this._markNewGroupReceive(groupId);
-            this._fire("receiveGroupMessage",groupId);
-            if(callback)
-                callback();
+        this._getLocalRecord(groupId,msgId,fromId,(rec)=>{
+            if(!rec){
+                this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,file:file,msgId:msgId,time:Date.now()},()=>{
+                    this._markNewGroupReceive(groupId);
+                    this._fire("receiveGroupMessage",groupId);
+                    if(callback)
+                        callback();
+                });
+            }else{
+                if(callback)
+                    callback();
+            }
         });
+
     },
     sendGroupImage:function (gid,data,msgId,callback) {
         this._insertRecord2Local(gid,{img:data,msgId:msgId,time:Date.now(),state:Store.MESSAGE_STATE_SENDING},()=>{

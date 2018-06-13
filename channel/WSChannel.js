@@ -29,11 +29,11 @@ var WSChannel={
     _lastPongTime:null,
     seed:Date.now(),
     callbacks:{},
-    generataMsgId : function () {
+    generateMsgId : function () {
         return this.seed++;
     },
     newRequestMsg:function (action,data,callback,targetUid,targetCid,msgId) {
-        var id = msgId||this.generataMsgId();
+        var id = msgId||this.generateMsgId();
         if(callback)
             this.callbacks[id] = callback;
         return  {id:id,action:action,data:data,uid:Store.getCurrentUid(),targetUid:targetUid,cid:Store.getClientId(),targetCid:targetCid};//id消息id uid 身份id
@@ -74,7 +74,7 @@ var WSChannel={
                     else{
                         // WSChannel.ws.send(JSON.stringify({key:msg.key,isResponse:true,action:action,id:msg.id,targetUid:msg.uid,targetCid:msg.cid}));
                         var handle = function(m){
-                            WSChannel[action+"Handler"](m,()=>{
+                            WSChannel[m.action+"Handler"](m,()=>{
                                 try{
                                     WSChannel.ws.send(JSON.stringify({key:m.key,isResponse:true}));
 
@@ -238,7 +238,7 @@ var WSChannel={
     fetchAllMessages:function () {
         if(Store.getLoginState()){
             var req = WSChannel.newRequestMsg("fetchAllMessages",null);
-            this._sendRequest(req,null,ip,true);
+            this._sendRequest(req,null,null,true);
         }
 
     },
