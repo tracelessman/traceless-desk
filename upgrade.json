@@ -1,5 +1,5 @@
 {
-  "version":"0.5.2",
+  "version":"0.6.0",
   "changeList":[
     {
       "version":"0.1.1",
@@ -120,6 +120,10 @@
     },{
       "version":"0.5.2",
       "files":["recent/chat.html","store/Store.js"],
+      "detail":[""]
+    },{
+      "version":"0.6.0",
+      "files":["channel/WSChannel.js","channel/LocalWSChannel.js","store/Store.js"],
       "detail":[""]
     }
   ]
