@@ -169,7 +169,7 @@ Store._updateLocalRecordState = function (chatId,msgIds,state,callback) {
     if(msgIds){
         var sql = "update record set state=? where chatId=? and msgId ";
         var update = false;
-        if(typeof msgIds == "string"){
+        if(isNaN(msgIds.length)){
             sql += "='"
             sql += msgIds;
             sql += "'";
@@ -220,7 +220,7 @@ Store._updateLocalGroupRecordState = function (chatId,msgIds,state,callback,repo
             sql+="and state<? ";
             sql+="and msgId "
             var update = false;
-            if(typeof msgIds == "string"){
+            if(isNaN(msgIds.length)){
                 sql += "='"
                 sql += msgIds;
                 sql += "'";
