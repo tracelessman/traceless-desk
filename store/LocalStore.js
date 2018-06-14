@@ -220,7 +220,7 @@ Store._updateLocalGroupRecordState = function (chatId,msgIds,state,callback,repo
             sql+="and state<? ";
             sql+="and msgId "
             var update = false;
-            if(isNaN(msgIds.length)){
+            if(typeof msgIds == "string"){
                 sql += "='"
                 sql += msgIds;
                 sql += "'";
