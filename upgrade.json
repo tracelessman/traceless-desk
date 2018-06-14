@@ -1,5 +1,5 @@
 {
-  "version":"0.6.1",
+  "version":"0.6.2",
   "changeList":[
     {
       "version":"0.1.1",
@@ -127,6 +127,10 @@
       "detail":[""]
     },{
       "version":"0.6.1",
+      "files":["store/LocalStore.js"],
+      "detail":[""]
+    },{
+      "version":"0.6.2",
       "files":["store/LocalStore.js"],
       "detail":[""]
     }
