@@ -674,6 +674,18 @@ var Store = {
             this._save();
             this._fire("updateFriendPic",f)
         }
+    },
+    setPersonalName:function (name) {
+        this.keyData.name = name;
+        this._save();
+    },
+    updateFriendName:function (uid,name) {
+        var f = this.getFriend(uid);
+        if(f){
+            f.name = name;
+            this._save();
+            this._fire("updateFriendName",f)
+        }
     }
     // rejectMKFriends : function (index) {
     //     for(var i=0;i<this.data.length;i++) {
