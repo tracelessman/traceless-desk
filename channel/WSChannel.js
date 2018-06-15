@@ -179,7 +179,6 @@ var WSChannel={
     },
     login:function (name,uid,cid,ip,callback,timeoutCallback) {
         Store.setCurrentUid(uid) ;
-        // window.top.ipc.send("upgrade-request",{toIndexIFNot:false});
         var req = WSChannel.newRequestMsg("login",{name:name,uid:uid,cid:cid},
             function (msg) {
                 if(!msg.err){
@@ -517,6 +516,22 @@ var WSChannel={
     },
     setPersonalPicHandler:function(msg){
         Store.updateFriendPic(msg.uid,msg.data.pic);
+    },
+    setPersonalName:function (name,callback,timeoutCallback) {
+        var req = WSChannel.newRequestMsg("setPersonalName",{name:name},(data)=>{
+            if(!data.err){
+                Store.setPersonalName(name);
+            }
+            callback(data);
+        });
+        this._sendRequest(req,timeoutCallback);
+    },
+
+    setPersonalNameFromOtherDevice:function(msg){
+        Store.setPersonalName(msg.data.name);
+    },
+    setPersonalNameHandler:function(msg){
+        Store.updateFriendName(msg.uid,msg.data.name);
     },
     addGroupMembers:function (gid,uids,errCallback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("addGroupMembers",{groupId:gid,groupName:Store.getGroup(gid).name,newMembers:uids},(data)=>{
