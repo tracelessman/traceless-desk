@@ -514,8 +514,9 @@ var WSChannel={
     setPersonalPicFromOtherDevice:function(msg){
         Store.setPersonalPic(msg.data.pic);
     },
-    setPersonalPicHandler:function(msg){
+    setPersonalPicHandler:function(msg,callback){
         Store.updateFriendPic(msg.uid,msg.data.pic);
+        callback();
     },
     setPersonalName:function (name,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("setPersonalName",{name:name},(data)=>{
@@ -530,8 +531,9 @@ var WSChannel={
     setPersonalNameFromOtherDevice:function(msg){
         Store.setPersonalName(msg.data.name);
     },
-    setPersonalNameHandler:function(msg){
+    setPersonalNameHandler:function(msg,callback){
         Store.updateFriendName(msg.uid,msg.data.name);
+        callback();
     },
     addGroupMembers:function (gid,uids,errCallback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("addGroupMembers",{groupId:gid,groupName:Store.getGroup(gid).name,newMembers:uids},(data)=>{
@@ -546,6 +548,7 @@ var WSChannel={
     },
     addGroupMembersHandler:function (msg,callback) {
         Store.addGroupMembers(msg.data.groupId,msg.data.groupName,msg.data.newMembers,msg.data.allMembers);
+        callback();
     },
     leaveGroup:function (gid) {
 
