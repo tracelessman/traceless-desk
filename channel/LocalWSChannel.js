@@ -24,13 +24,13 @@ WSChannel.decrypt = function (encrypted) {
     // if(de===undefined||de==null){
     //     return "无法解密的密文";
     // }
-    // return de;
-    if(encrypted){
+    // return de;if(encrypted){
+    try{
         var bytes  = CryptoJS.AES.decrypt(encrypted.toString(), '999');
         return bytes.toString(CryptoJS.enc.Utf8);
+    }catch(e){
+        return encrypted;
     }
-    return "";
-
 }
 // WSChannel.generateMsgId = function () {
 //     return UUID();

@@ -434,7 +434,7 @@ var Store = {
         if(!group){
             this.addGroup(gid,groupName,allMembers);
         }
-        if(group){
+        else{
 
             if(allMembers)
                 group.members = allMembers;
@@ -449,6 +449,7 @@ var Store = {
                     }
                 });
             }
+            this._save();
             this._fire("groupMembersChanged",gid);
         }
     },
@@ -678,6 +679,7 @@ var Store = {
     setPersonalName:function (name) {
         this.keyData.name = name;
         this._save();
+        this._fire('rename')
     },
     updateFriendName:function (uid,name) {
         var f = this.getFriend(uid);
