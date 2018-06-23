@@ -1,5 +1,5 @@
 {
-  "version":"0.6.6",
+  "version":"0.6.7",
   "changeList":[
     {
       "version":"0.1.1",
@@ -148,6 +148,10 @@
     },{
       "version":"0.6.6",
       "files":["channel/LocalWSChannel.js","channel/WSChannel.js","store/Store.js"],
+      "detail":[""]
+    },{
+      "version":"0.6.7",
+      "files":["channel/LocalWSChannel.js","channel/WSChannel.js","store/Store.js","store/LocalStore.js"],
       "detail":[""]
     }
   ]
