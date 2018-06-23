@@ -165,15 +165,47 @@ Store._insertRecord2Local = function (chatId,record,callback) {
         }
     });
 };
-Store._updateLocalRecordState = function (chatId,msgIds,state,callback) {
-    if(msgIds){
-        var sql = "update record set state=? where chatId=? and msgId ";
-        var update = false;
+Store._updateLocalRecordState = function (chatId,msgIds,state,callback,senderCid) {
+    var doit = function () {
+        if(msgIds){
+            var sql = "update record set state=? where chatId=? and msgId ";
+            var update = false;
+            if(isNaN(msgIds.length)){
+                sql += "='"
+                sql += msgIds;
+                sql += "'";
+                update = true;
+            }else{
+                sql += "in (";
+                for(var i=0;i<msgIds.length;i++){
+                    sql+="'";
+                    sql+=msgIds[i];
+                    sql+="'";
+                    if(i<msgIds.length-1){
+                        sql+=",";
+                    }
+                }
+                sql+=")";
+                update = true;
+            }
+            if(update)
+                db.run(sql,[state,chatId],(err)=>{
+                    if(err){
+                        console.info(err);
+                    }else{
+                        callback();
+                    }
+                });
+        }
+    }
+    if(senderCid&&senderCid!=Store.getClientId()){
+        var sql = "select msgId from record where chatId=? and senderUid is null and senderCid=? and msgId ";
+        var num = 0;
         if(isNaN(msgIds.length)){
             sql += "='"
             sql += msgIds;
             sql += "'";
-            update = true;
+            num = 1;
         }else{
             sql += "in (";
             for(var i=0;i<msgIds.length;i++){
@@ -183,18 +215,22 @@ Store._updateLocalRecordState = function (chatId,msgIds,state,callback) {
                 if(i<msgIds.length-1){
                     sql+=",";
                 }
+                num++;
             }
             sql+=")";
-            update = true;
         }
-        if(update)
-            db.run(sql,[state,chatId],(err)=>{
-                if(err){
-                    console.info(err);
-                }else{
-                    callback();
+        db.all(sql,[chatId,senderCid],function (err,rows) {
+            if(err){
+                console.info(err);
+            }else{
+                if(rows&&rows.length==num){
+                    doit();
                 }
-            });
+            }
+        });
+
+    }else{
+        doit();
     }
 };
 Store._getLocalRecord = function (chatId,msgId,senderUid,callback) {
