@@ -50,7 +50,7 @@ var Store = {
     _insertRecord2Local:function (charId,record,callback) {
 
     },
-    _updateLocalRecordState : function (chatId,msgIds,state,callback) {
+    _updateLocalRecordState : function (chatId,msgIds,state,callback,senderCid) {
 
     },
     _getLocalRecord : function (chatId,msgId,senderUid,callback) {
@@ -358,20 +358,20 @@ var Store = {
         });
 
     },
-    sendMessage:function (targetId,text,msgId,callback) {
-        this._insertRecord2Local(targetId,{text:text,msgId:msgId,time:Date.now(),state:Store.MESSAGE_STATE_SENDING},()=>{
+    sendMessage:function (targetId,text,msgId,callback,senderCid,time) {
+        this._insertRecord2Local(targetId,{senderCid:senderCid,text:text,msgId:msgId,time:time||Date.now(),state:senderCid?Store.MESSAGE_STATE_SERVER_RECEIVE:Store.MESSAGE_STATE_SENDING},()=>{
             if(callback)
                 callback();
             this._fire("sendMessage",targetId);
         });
     },
 
-    updateMessageState:function (targetId,msgIds,state,callback) {
+    updateMessageState:function (targetId,msgIds,state,callback,senderCid) {
         this._updateLocalRecordState(targetId,msgIds,state, () =>{
             if(callback)
                 callback();
             this._fire("updateMessageState",targetId);
-        });
+        },senderCid);
     },
 
     getRecentChatRecord:function (targetId,msgId,uid,callback) {
