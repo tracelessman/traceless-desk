@@ -326,6 +326,9 @@ var WSChannel={
     sendImageHandler:function(msg,callback){
         Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data,callback);
     },
+    sendImageSelfSyncHandler:function(msg,callback){
+        Store.sendImage(msg.tureTargetUid,msg.data.data,msg.id,callback,msg.cid,msg.time);
+    },
     resendImageHandler:function(msg,callback){
         Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data,callback);
     },
@@ -367,6 +370,9 @@ var WSChannel={
     resendGroupMessageHandler:function(msg,callback){
         Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text),callback);
     },
+    sendGroupMessageSelfSyncHandler:function (msg,callback) {
+        Store.sendGroupMessage(msg.data.groupId,this.decrypt(msg.data.text),msg.id,callback,msg.cid,msg.time);
+    },
     sendGroupImage:function (groupId,groupName,data,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendGroupImage",{groupId:groupId,groupName:groupName,name:Store.getCurrentName(),data:data},(data,msgId)=>{
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
@@ -393,6 +399,9 @@ var WSChannel={
     },
     resendGroupImageHandler:function(msg,callback){
         Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
+    },
+    sendGroupImageSelfSyncHandler:function (msg,callback) {
+        Store.sendGroupImage(msg.data.groupId,msg.data.data,msg.id,callback,msg.cid,msg.time)
     },
 
     _sendRequest:function (req,timeoutCallback,ip,preventDefaultTimeout) {
@@ -427,8 +436,8 @@ var WSChannel={
     msgReadStateReportHandler:function (msg,callback) {
         Store.updateMessageState(msg.uid,msg.data.readMsgs,msg.data.state,callback,msg.data.cid);
     },
-    groupMsgReadStateReport:function (gid,readMsgs,targetUid) {
-        var req = WSChannel.newRequestMsg("groupMsgReadStateReport",{gid:gid,readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ},function (data,msgId) {
+    groupMsgReadStateReport:function (gid,readMsgs,targetUid,targetCid) {
+        var req = WSChannel.newRequestMsg("groupMsgReadStateReport",{gid:gid,readMsgs:readMsgs,state:Store.MESSAGE_STATE_TARGET_READ,cid:targetCid},function (data,msgId) {
             Store.removeFromMQ(msgId);
         },targetUid);
         Store.push2MQ(req,function () {
@@ -436,7 +445,7 @@ var WSChannel={
         });
     },
     groupMsgReadStateReportHandler:function (msg,callback) {
-        Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state,msg.uid,callback);
+        Store.updateGroupMessageState(msg.data.gid,msg.data.readMsgs,msg.data.state,msg.uid,callback,msg.data.cid);
     },
     checkTimeoutMsg:function() {
         Store.eachTimeoutMsg(function (row) {
@@ -478,6 +487,9 @@ var WSChannel={
     resendFileHandler:function(msg,callback){
         Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data.file,callback);
     },
+    sendFileSelfSyncHandler:function (msg,callback) {
+        Store.sendFile(msg.tureTargetUid,msg.data.file,msg.id,callback,msg.cid,msg.time);
+    },
     sendGroupFile:function (groupId,groupName,data,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("sendGroupFile",{groupId:groupId,data:data,groupName:groupName,name:Store.getCurrentName()},(data,msgId)=>{
             Store.updateGroupMessageState(groupId,msgId,Store.MESSAGE_STATE_SERVER_RECEIVE);
@@ -504,6 +516,9 @@ var WSChannel={
     },
     resendGroupFileHandler:function(msg,callback){
         Store.receiveGroupFile(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
+    },
+    sendGroupFileSelfSyncHandler:function (msg,callback) {
+        Store.sendGroupFile(msg.data.groupId,msg.data.data,msg.id,callback,msg.cid,msg.time);
     },
     setPersonalPic:function (pic,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("setPersonalPic",{pic:pic},(data)=>{
