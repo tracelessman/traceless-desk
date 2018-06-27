@@ -132,7 +132,7 @@ var WSChannel={
                             //alert(error);
                         }
                         console.info("relogin end:"+Date.now());
-                    });
+                    },null,Store.getDeviceId());
                 }
             });
         }
@@ -178,9 +178,10 @@ var WSChannel={
             },this.timeout);
         }
     },
-    login:function (name,uid,cid,ip,callback,timeoutCallback) {
+    login:function (name,uid,cid,ip,callback,timeoutCallback,deviceId) {
         Store.setCurrentUid(uid) ;
-        var req = WSChannel.newRequestMsg("login",{name:name,uid:uid,cid:cid},
+        Store.setDeviceId(deviceId);
+        var req = WSChannel.newRequestMsg("login",{name:name,uid:uid,cid:cid,deviceId:deviceId},
             function (msg) {
                 if(!msg.err){
                     Store.setLoginState(true);
@@ -294,10 +295,10 @@ var WSChannel={
         });
     },
     sendMessageHandler:function(msg,callback){
-        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text),callback);
+        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text),callback,msg.time);
     },
     resendMessageHandler:function(msg,callback){
-        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text),callback);
+        Store.receiveMessage(msg.uid,msg.cid,msg.id,this.decrypt(msg.data.text),callback,msg.time);
     },
     sendMessageSelfSyncHandler:function (msg,callback) {
         Store.sendMessage(msg.tureTargetUid,this.decrypt(msg.data.text),msg.id,callback,msg.cid,msg.time);
@@ -324,13 +325,13 @@ var WSChannel={
         });
     },
     sendImageHandler:function(msg,callback){
-        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data,callback);
+        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data,callback,msg.time);
     },
     sendImageSelfSyncHandler:function(msg,callback){
         Store.sendImage(msg.tureTargetUid,msg.data.data,msg.id,callback,msg.cid,msg.time);
     },
     resendImageHandler:function(msg,callback){
-        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data,callback);
+        Store.receiveImage(msg.uid,msg.cid,msg.id,msg.data.data,callback,msg.time);
     },
     addGroup:function (groupId,groupName,members,callback,timeoutCallback) {
         var req = WSChannel.newRequestMsg("addGroup",{groupId:groupId,groupName:groupName,members:members},callback);
@@ -365,10 +366,10 @@ var WSChannel={
         });
     },
     sendGroupMessageHandler:function(msg,callback){
-        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text),callback);
+        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text),callback,msg.time);
     },
     resendGroupMessageHandler:function(msg,callback){
-        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text),callback);
+        Store.receiveGroupMessage(msg.uid,msg.cid,msg.id,msg.data.groupId,this.decrypt(msg.data.text),callback,msg.time);
     },
     sendGroupMessageSelfSyncHandler:function (msg,callback) {
         Store.sendGroupMessage(msg.data.groupId,this.decrypt(msg.data.text),msg.id,callback,msg.cid,msg.time);
@@ -395,10 +396,10 @@ var WSChannel={
         });
     },
     sendGroupImageHandler:function(msg,callback){
-        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
+        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback,msg.time);
     },
     resendGroupImageHandler:function(msg,callback){
-        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
+        Store.receiveGroupImage(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback,msg.time);
     },
     sendGroupImageSelfSyncHandler:function (msg,callback) {
         Store.sendGroupImage(msg.data.groupId,msg.data.data,msg.id,callback,msg.cid,msg.time)
@@ -482,10 +483,10 @@ var WSChannel={
         });
     },
     sendFileHandler:function(msg,callback){
-        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data.file,callback);
+        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data.file,callback,msg.time);
     },
     resendFileHandler:function(msg,callback){
-        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data.file,callback);
+        Store.receiveFile(msg.uid,msg.cid,msg.id,msg.data.file,callback,msg.time);
     },
     sendFileSelfSyncHandler:function (msg,callback) {
         Store.sendFile(msg.tureTargetUid,msg.data.file,msg.id,callback,msg.cid,msg.time);
@@ -512,10 +513,10 @@ var WSChannel={
         });
     },
     sendGroupFileHandler:function(msg,callback){
-        Store.receiveGroupFile(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
+        Store.receiveGroupFile(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback,msg.time);
     },
     resendGroupFileHandler:function(msg,callback){
-        Store.receiveGroupFile(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback);
+        Store.receiveGroupFile(msg.uid,msg.cid,msg.id,msg.data.groupId,msg.data.data,callback,msg.time);
     },
     sendGroupFileSelfSyncHandler:function (msg,callback) {
         Store.sendGroupFile(msg.data.groupId,msg.data.data,msg.id,callback,msg.cid,msg.time);
