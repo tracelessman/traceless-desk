@@ -1,6 +1,6 @@
 {
   "name": "traceless",
-  "version": "0.6.13",
+  "version": "0.6.14",
   "main": "./main.bundle.js",
   "scripts": {
     "start": "electron ./main.bundle.js",
