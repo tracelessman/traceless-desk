@@ -213,7 +213,7 @@
                             for(var i=0;i<members.length;i++){
                                 var f = members[i];
                                 if(f.uid!=window.top.Store.getCurrentUid()){
-                                    var state = rec.state;
+                                    var state = rec.state>Store.MESSAGE_STATE_SERVER_RECEIVE?Store.MESSAGE_STATE_SERVER_RECEIVE:rec.state;
                                     for(var j=0;j<states.length;j++){
                                         if(states[j].reporterUid == f.uid){
                                             state = states[j].state;
