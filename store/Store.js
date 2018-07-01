@@ -99,10 +99,11 @@ var Store = {
         if(this.data){
             callback(this.data);
         }else{
-            this.queryFromLocal("data",function (result) {
+            this.queryFromLocal("data",(result)=> {
                 if(result){
-                    Store.data = JSON.parse(result);
-                    callback(Store.data);
+                    this.data = JSON.parse(result);
+                    this._fire("fetchAllKeys", this.data)
+                    callback(this.data);
                 }else{
                     callback(null);
                 }
@@ -314,10 +315,10 @@ var Store = {
         recent.newMsgNum++;
         this._save();
     },
-    receiveMessage:function (fromId,fromCid,msgId,text,callback) {
+    receiveMessage:function (fromId,fromCid,msgId,text,callback,time) {
         this._getLocalRecord(fromId,msgId,fromId,(rec)=>{
             if(!rec){
-                this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,text:text,msgId:msgId,time:Date.now()},()=>{
+                this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,text:text,msgId:msgId,time:time||Date.now()},()=>{
                     this._markNewReceive(fromId);
                     this._fire("receiveMessage",fromId);
                     if(callback)
@@ -330,10 +331,10 @@ var Store = {
         });
 
     },
-    receiveImage:function (fromId,fromCid,msgId,img,callback) {
+    receiveImage:function (fromId,fromCid,msgId,img,callback,time) {
         this._getLocalRecord(fromId,msgId,fromId,(rec)=>{
             if(!rec){
-                this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,img:img,msgId:msgId,time:Date.now()},()=>{
+                this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,img:img,msgId:msgId,time:time||Date.now()},()=>{
                     this._markNewReceive(fromId);
                     this._fire("receiveMessage",fromId);
                     if(callback)
@@ -346,10 +347,10 @@ var Store = {
         });
 
     },
-    receiveFile:function (fromId,fromCid,msgId,file,callback) {
+    receiveFile:function (fromId,fromCid,msgId,file,callback,time) {
         this._getLocalRecord(fromId,msgId,fromId,(rec)=>{
             if(!rec){
-                this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,file:file,msgId:msgId,time:Date.now()},()=>{
+                this._insertRecord2Local(fromId,{senderUid:fromId,senderCid:fromCid,file:file,msgId:msgId,time:time||Date.now()},()=>{
                     this._markNewReceive(fromId);
                     this._fire("receiveMessage",fromId);
                     if(callback)
@@ -512,10 +513,10 @@ var Store = {
             this._save();
         }
     },
-    receiveGroupMessage:function (fromId,fromCid,msgId,groupId,text,callback) {
+    receiveGroupMessage:function (fromId,fromCid,msgId,groupId,text,callback,time) {
         this._getLocalRecord(groupId,msgId,fromId,(rec)=>{
             if(!rec){
-                this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,text:text,msgId:msgId,time:Date.now()},()=>{
+                this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,text:text,msgId:msgId,time:time||Date.now()},()=>{
                     this._markNewGroupReceive(groupId);
                     this._fire("receiveGroupMessage",groupId);
                     if(callback)
@@ -546,10 +547,10 @@ var Store = {
     getGroupChatRecord:function (gid,msgId,uid,callback) {
         this._getLocalRecord(gid,msgId,uid,callback);
     },
-    receiveGroupImage:function (fromId,fromCid,msgId,groupId,img,callback) {
+    receiveGroupImage:function (fromId,fromCid,msgId,groupId,img,callback,time) {
         this._getLocalRecord(groupId,msgId,fromId,(rec)=>{
             if(!rec){
-                this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,img:img,msgId:msgId,time:Date.now()},()=>{
+                this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,img:img,msgId:msgId,time:time||Date.now()},()=>{
                     this._markNewGroupReceive(groupId);
                     this._fire("receiveGroupMessage",groupId);
                     if(callback)
@@ -562,10 +563,10 @@ var Store = {
         });
 
     },
-    receiveGroupFile:function (fromId,fromCid,msgId,groupId,file,callback) {
+    receiveGroupFile:function (fromId,fromCid,msgId,groupId,file,callback,time) {
         this._getLocalRecord(groupId,msgId,fromId,(rec)=>{
             if(!rec){
-                this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,file:file,msgId:msgId,time:Date.now()},()=>{
+                this._insertRecord2Local(groupId,{senderUid:fromId,senderCid:fromCid,file:file,msgId:msgId,time:time||Date.now()},()=>{
                     this._markNewGroupReceive(groupId);
                     this._fire("receiveGroupMessage",groupId);
                     if(callback)
