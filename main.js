@@ -26,7 +26,7 @@ let mainWindow;
 function createWindow () {
 
     // Create the browser window.
-    mainWindow = new BrowserWindow({width: 1024, height: 768,titleBarStyle: 'hidden',frame:true});
+    mainWindow = new BrowserWindow({width: 1024, height: 768});
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, '/index/loading.html'),
         protocol: 'file:',

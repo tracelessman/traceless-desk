@@ -14,3 +14,5 @@ _tmp2
 
 asars/
 *.bundle.js
+
+*.db
